@@ -1,0 +1,15 @@
+{
+  "name": "frie",
+  "owner": {
+    "name": "Brandon Frie"
+  },
+  "description": "Brandon Frie's agent skills, as an installable Claude Code plugin.",
+  "plugins": [
+    {
+      "name": "frie-skills",
+      "source": "./",
+      "description": "Brandon Frie's coding standards and architecture rules for C#, .NET, Blazor, and Python.",
+      "category": "engineering"
+    }
+  ]
+}
