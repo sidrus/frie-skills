@@ -2,7 +2,7 @@
 
 General practice, not a description of any one repo. Where a repo's own code disagrees with this file, the repo is drift and this file is the target.
 
-`SKILL.md` holds the design rules that apply everywhere: simplest thing that solves the problem, re-derive downstream when a decision changes, classify errors at the call site, push integrity into the database. `dotnet-layering.md` holds the mechanical type layering. This file holds structure, state, performance, and observability.
+`SKILL.md` holds the design rules that apply everywhere, and `dotnet-layering.md` holds the mechanical type layering. This file holds structure, state, performance, and observability.
 
 ## Layer responsibilities
 
@@ -52,9 +52,7 @@ Extraction must never read worse than the duplication did. When it does, the par
 
 ## YAGNI
 
-No code without a current requirement, because until the requirement exists you do not know what to build. It rules out speculative abstractions, fan-out over a single implementation, extension points for changes nobody has asked for, and configuration for values that do not vary.
-
-YAGNI does not compete with anything above it. Every structural rule here fires on something that exists right now: a seam a fake needs, a duplicate already in the file, an arm with a real dependency. YAGNI only ever speaks to what does not exist yet. The two never arbitrate the same decision, so there is no priority order to apply between them.
+YAGNI, the `SKILL.md` rule against code without a current requirement, does not compete with anything above it. Every structural rule here fires on something that exists right now: a seam a fake needs, a duplicate already in the file, an arm with a real dependency. YAGNI only ever speaks to what does not exist yet. The two never arbitrate the same decision, so there is no priority order to apply between them.
 
 ## State and immutability
 

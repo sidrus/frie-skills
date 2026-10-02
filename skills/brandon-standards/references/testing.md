@@ -26,9 +26,12 @@ Tests are classical, not mockist. The unit under test is a behavior, not a class
 ## How to assert
 
 - Assert on values, never on booleans.
-- Never assert on strings. Assert on the observable state the behavior produced, such as the persisted entity, the returned object's typed fields, the captured message, or the exception type and its structured properties. String assertions are fragile, because rewording a message, a log line, rendered markup, or a `ToString()` breaks the test without any change in behavior. That covers exception messages, log output, rendered HTML, serialized payloads, `ToString()` output, and substring or regex matches against any of them.
-  - The one exception is a behavior whose observable output is the string itself, such as a CSV writer, a slug generator, or a wire format, and only when the spec gives the exact expected value. Assert equality against that spec value in full, never a substring or pattern. Without a spec-supplied value, the rule above holds.
+- Assert on observable state, such as the persisted entity, the returned object's typed fields, the captured message, or the exception type and its structured properties. Never assert on strings, including exception messages, log output, rendered HTML, serialized payloads, `ToString()` output, and substring or regex matches against any of them. Rewording any of these breaks a string assertion with no change in behavior.
+  - The one exception is a behavior whose observable output is the string itself, such as a CSV writer, a slug generator, or a wire format, and only when the spec gives the exact expected value. Assert full equality against that value.
 - Assert against the generated source object rather than a re-derived expectation.
+
+## Harness
+
 - Use a library's intended extension point (generator overrides, DI `RemoveAll`, BCL built-ins) rather than working around it.
 - Root-cause a flake empirically. Loop the suite and probe the generator rather than adding a retry.
 
@@ -36,7 +39,6 @@ Tests are classical, not mockist. The unit under test is a behavior, not a class
 
 - Prefer hand-written, state-based fakes for in-process collaborators: a fake repository, a capturing publisher, a recording processor.
 - A mocking library's `.Received()` is reserved for true external boundaries, such as an HTTP gateway, a cache publish, or a feature-flag client, plus orchestrator seams that have no state-based alternative.
-- A non-obvious test double gets a short XML doc saying why the type exists. This is one of the few comment exceptions.
 
 ## Where test code lives
 
@@ -63,4 +65,3 @@ Every value a test builds comes from Faker: Bogus in .NET, Faker in Python. Gene
 - A literal appears only where the behavior under test depends on that exact value: a boundary, a format the code parses, or two values that must collide or differ. Everything else in the arrangement is generated, including names, identifiers, dates, and amounts.
 - Each domain type gets one `Faker<T>` in the test project, so a new required property is set in one place. A test overrides only the properties its behavior depends on.
 - A value the test must reason about is drawn from Faker first, then reused in the arrangement and the assertion, never retyped.
-- Assertions compare against the generated object, per "How to assert", so a generated value never has to be restated.

@@ -1,6 +1,6 @@
 ---
 name: brandon-standards
-description: Brandon's coding standards and architecture rules for C#, .NET, Blazor, and Python. Use before writing, editing, reviewing, or designing code. Covers interfaces, where logic lives, layering, DRY, comments, tests, performance, observability.
+description: Coding standards and architecture rules for C#, .NET, Blazor, and Python. Use before writing, editing, reviewing, or designing code or tests.
 ---
 
 # Coding Standards
@@ -39,24 +39,24 @@ Two exceptions:
 
 When a comment **is** requested, write one terse line. Don't explain how a test works, don't restate the name of the thing being commented, and don't add a second line.
 
-If the user deleted a comment or a block of code, it stays deleted. Never restore it.
+If the user deleted a comment or a block of code, it stays deleted.
 
 A comment that turns out to be wrong or misleading gets deleted, not corrected. Rewriting it to be accurate is still adding a comment, and the code and config already say what is true.
 
 ## Prose in docs and messages
 
-- American English spelling. Scan touched files before finishing.
-- No AI-speak punctuation: no em-dash asides, no colon-chained clauses. Restructure into flowing grammatical sentences rather than choppy fragments. Term-definition bullets and tables are fine.
+- American English spelling.
+- Write flowing grammatical sentences. Em-dash asides and colon-chained clauses read as AI-speak, so restructure them into full sentences rather than choppy fragments. Term-definition bullets and tables are fine.
 - Docs state project-specific facts only. Cut anything most developers already know.
 - When removing content from a spec or doc, keep the section title and its numbering and replace the body with a brief note that it was removed as out of scope.
 - Temporary or one-off docs don't get linked from a docs index.
 
 ## Design
 
-Structure, state, performance, and observability are in `references/architecture.md`. Read it before designing anything. What follows applies to every decision regardless of layer:
+These apply to every decision regardless of layer. Structure, state, performance, and observability are in `references/architecture.md`.
 
 - The simplest solution that solves the problem wins. This governs the size of what you build, never whether the code you do build is properly structured.
-- No code without a current requirement. Speculative abstractions, fan-out over one implementation, and extension points for changes nobody asked for all get cut.
+- No code without a current requirement (YAGNI), because until the requirement exists you do not know what to build. Speculative abstractions, fan-out over one implementation, extension points for changes nobody asked for, and configuration for values that do not vary all get cut.
 - Surface simplifications unprompted during design work.
 - When a decision changes, re-derive everything downstream of it. Treat every remaining element as unjustified until it re-earns its place, rather than patching around a superseded decision.
 - Classify errors at the call site, where the type and the stage are both known. Dispatch on exception type or structured fields, never on message text.
@@ -64,13 +64,13 @@ Structure, state, performance, and observability are in `references/architecture
 
 ## Testing, in brief
 
-Full detail in `references/testing.md`. The six that are never negotiable:
+Full detail in `references/testing.md`. These are never negotiable:
 
 - TDD for anything with real behavior. Run the failing test and show its output before writing implementation, every cycle.
 - Behavior only. No tests for 1:1 mappers, pass-through wrappers, options records, path literals, or feature-flag toggles, and no chasing a coverage percentage.
 - No persistence round-trip or schema-confirmation tests. The database does its job.
 - Assert on values, never on booleans.
-- Never assert on strings. Assert on observable state, because string assertions break when wording changes and behavior doesn't. The only exception is when the string is the observable output and the spec gives its exact value.
+- Assert on observable state, never on strings, because a string assertion breaks when wording changes and behavior doesn't. The only exception is when the string is the observable output and the spec gives its exact value.
 - Test data comes from Faker. A literal appears only where the behavior under test depends on that exact value.
 
 ## Suppressions

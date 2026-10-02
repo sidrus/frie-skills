@@ -1,6 +1,6 @@
 {
   "name": "frie-skills",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Brandon Frie's coding standards and architecture rules for C#, .NET, Blazor, and Python.",
   "author": {
     "name": "Brandon Frie"
