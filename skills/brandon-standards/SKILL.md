@@ -64,12 +64,13 @@ Structure, state, performance, and observability are in `references/architecture
 
 ## Testing, in brief
 
-Full detail in `references/testing.md`. The five that are never negotiable:
+Full detail in `references/testing.md`. The six that are never negotiable:
 
 - TDD for anything with real behavior. Run the failing test and show its output before writing implementation, every cycle.
 - Behavior only. No tests for 1:1 mappers, pass-through wrappers, options records, path literals, or feature-flag toggles, and no chasing a coverage percentage.
 - No persistence round-trip or schema-confirmation tests. The database does its job.
 - Assert on values, never on booleans.
+- Never assert on strings. Assert on observable state, because string assertions break when wording changes and behavior doesn't. The only exception is when the string is the observable output and the spec gives its exact value.
 - Test data comes from Faker. A literal appears only where the behavior under test depends on that exact value.
 
 ## Suppressions

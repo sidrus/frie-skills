@@ -26,6 +26,8 @@ Tests are classical, not mockist. The unit under test is a behavior, not a class
 ## How to assert
 
 - Assert on values, never on booleans.
+- Never assert on strings. Assert on the observable state the behavior produced, such as the persisted entity, the returned object's typed fields, the captured message, or the exception type and its structured properties. String assertions are fragile, because rewording a message, a log line, rendered markup, or a `ToString()` breaks the test without any change in behavior. That covers exception messages, log output, rendered HTML, serialized payloads, `ToString()` output, and substring or regex matches against any of them.
+  - The one exception is a behavior whose observable output is the string itself, such as a CSV writer, a slug generator, or a wire format, and only when the spec gives the exact expected value. Assert equality against that spec value in full, never a substring or pattern. Without a spec-supplied value, the rule above holds.
 - Assert against the generated source object rather than a re-derived expectation.
 - Use a library's intended extension point (generator overrides, DI `RemoveAll`, BCL built-ins) rather than working around it.
 - Root-cause a flake empirically. Loop the suite and probe the generator rather than adding a retry.
