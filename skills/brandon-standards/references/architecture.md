@@ -1,6 +1,6 @@
 # Architecture
 
-General practice, not a description of any one repo. Where a repo's own code disagrees with this file, the repo is drift and this file is the target.
+General practice, not a description of any one repo.
 
 `SKILL.md` holds the design rules that apply everywhere, and `dotnet-layering.md` holds the mechanical type layering. This file holds structure, state, performance, and observability.
 

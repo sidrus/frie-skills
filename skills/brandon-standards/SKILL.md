@@ -11,6 +11,8 @@ description: Coding standards and architecture rules for C#, .NET, Blazor, and P
 2. This skill wins for style, layering, and policy.
 3. Generic installed skills (`dotnet-skills:csharp-coding-standards`, `dignified-python`, `astral:ruff`, `astral:ty`) cover what neither of the above does. Where they conflict with this skill, this skill wins.
 
+Existing code that disagrees with this skill is drift, not precedent. Write to this skill unless the repo's `CLAUDE.md` or `AGENTS.md` overrides it.
+
 Rules marked **(tooling)** are enforceable by an analyzer, `.editorconfig`, ruff, or ty, but whether they are enforced is per repo. Check what the repo actually configures. Where a rule is enforced, write it right the first time and don't spend review comments on it, because the build catches it. Where it isn't, the rule still holds and it's on you.
 
 ## Read the reference for what you touch
@@ -24,7 +26,7 @@ Rules marked **(tooling)** are enforceable by an analyzer, `.editorconfig`, ruff
 | `*.py` | `references/python.md` |
 | any test file | `references/testing.md` |
 
-Read the reference **before** the first edit, not as a check afterward. `csharp.md`, `dotnet-layering.md`, and both data-access files end with canonical shapes; copy those rather than re-deriving them from the rules. When existing code nearby already shows the shape, follow the code.
+Read the reference **before** the first edit, not as a check afterward. `csharp.md`, `dotnet-layering.md`, and both data-access files end with canonical shapes; copy those rather than re-deriving them from the rules.
 
 Skip the references only for a change that touches no code, such as a docs or config edit. The rules below apply either way.
 
@@ -48,7 +50,7 @@ A comment that turns out to be wrong or misleading gets deleted, not corrected. 
 - American English spelling.
 - Write flowing grammatical sentences. Em-dash asides and colon-chained clauses read as AI-speak, so restructure them into full sentences rather than choppy fragments. Term-definition bullets and tables are fine.
 - Docs state project-specific facts only. Cut anything most developers already know.
-- When removing content from a spec or doc, keep the section title and its numbering and replace the body with a brief note that it was removed as out of scope.
+- Docs read as current state. Removing content means deleting it outright, with no "removed" note, no "formerly", and no reference to a superseded plan. One source of truth per topic, so a replaced plan doc is deleted rather than left beside its successor.
 - Temporary or one-off docs don't get linked from a docs index.
 
 ## Design
