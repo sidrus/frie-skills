@@ -5,6 +5,7 @@ Brandon Frie's agent skills, packaged as a Claude Code plugin.
 | Skill | Purpose |
 |---|---|
 | `brandon-standards` | Coding standards and architecture rules for C#, .NET, Blazor, and Python |
+| `writing-style-guide` | Prose style for docs, code comments, commit messages, and chat |
 
 ## Install
 

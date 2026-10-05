@@ -1,13 +1,14 @@
 {
   "name": "frie-skills",
-  "version": "1.3.0",
-  "description": "Brandon Frie's coding standards and architecture rules for C#, .NET, Blazor, and Python.",
+  "version": "1.4.0",
+  "description": "Brandon Frie's coding standards and architecture rules for C#, .NET, Blazor, and Python, and his prose style guide.",
   "author": {
     "name": "Brandon Frie"
   },
   "repository": "https://github.com/sidrus/frie-skills",
   "license": "MIT",
   "skills": [
-    "./skills/brandon-standards"
+    "./skills/brandon-standards",
+    "./skills/writing-style-guide"
   ]
 }
