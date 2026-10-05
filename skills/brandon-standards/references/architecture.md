@@ -22,7 +22,7 @@ Data access is not unit tested. It delegates to its data source, so a unit test 
 
 ## Results, not booleans
 
-A service returns `Result<T>`. The API translates that into the HTTP response.
+A service returns a `Result`. The API translates that into the HTTP response. The error type and the arity are the repo's choice.
 
 A `bool` or a bare `null` return cannot carry why something failed, which forces the endpoint to know that false means "already shipped" here and "out of stock" there. That is domain knowledge in the marshalling layer, so the endpoint ends up owning a rule it is not allowed to own.
 
@@ -32,6 +32,7 @@ A `bool` or a bare `null` return cannot carry why something failed, which forces
 |---|---|
 | Interface | Substitution. The practical test is "will I write a fake for this?" An external dependency always qualifies. |
 | Record | Pure data. |
+| Enum | Two or more members. A single member carries no information, so a `Result` whose error type has one case says only that the call failed, which an exception already says. |
 | Static class or `extension(T)` | Pure methods. Purity beats injection, because a total function never needs a seam. |
 | Its own class | Any branch or switch arm with a dependency, or with more than trivial behavior. Isolated behavior is easier to reason about and easier to test. |
 | Nothing at all | Pass-through and forwarding types. If the body only forwards, the type should not exist. |

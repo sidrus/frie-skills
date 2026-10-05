@@ -6,9 +6,9 @@ A Blazor project has a component library, and which one it is varies. Identify i
 
 ## Styling
 
-Reach for styling in this order: the component library's own utility classes, then custom CSS in `app.css`, then inline `style=`. Inline is for a value that is genuinely one-off.
+Reach for styling in this order: the component library's own utility classes, then custom CSS, then inline `style=`. Inline is for a value that is genuinely one-off.
 
-Scoped CSS that has to reach into a child component's markup needs `::deep`.
+Custom CSS goes in scoped `.razor.css` files where the component library supports it, unless the repo's own instructions choose a global stylesheet. Scoped CSS that has to reach into a child component's markup needs `::deep`.
 
 ## Components
 
@@ -18,18 +18,24 @@ Extract repeated markup into a component. If the same structure appears in two o
 
 ## Project layout
 
-Feature-first, mirroring the server's `Features/<Feature>/` convention. A feature owns its page, the components only it renders, and its view records, all in one folder.
+The folder tree is a map of the application. Reading it alone should give a general sense of every feature, shared component, and system the app has.
+
+- **Similar code lives together.** Code that serves one feature, component, or system sits in one folder, so a change to it touches one place.
+- **Every folder names what it is for.** A folder is named for a feature (`Orders/`), a component, or a system (`Authorization/`, `SalesApi/`). Never for a kind of type (`Models/`, `Extensions/`, `Helpers/`) or a grab bag (`Infrastructure/`, `Common/`, `Utils/`), because those hide what the code does.
+- **A type lives beside its consumer.** A type that one feature uses goes in that feature, and a type that only a shared component uses goes beside that component. A type moves outward only when a second consumer appears, and then only as far as the nearest folder both consumers share.
+
+Feature-first, mirroring the server's `Features/<Feature>/` convention, is one layout that meets these outcomes:
 
 ```
-Features/<Feature>/     page + feature-only components + view records + feature projections
-Components/Shared/      components two or more features render
+Features/<Feature>/     page + feature-only components + view records + feature projections and parsers
+Components/             app root and the component toolkit: the cancellable base, operation state, dialog options
+Components/Shared/      components two or more features render, each with its own projections and options beside it
 Components/Layout/      shell: layout, sidebar, user menu, reconnect modal
-Infrastructure/         API client, current user, event subscriber, options, auth,
-                        logging, and cross-feature extensions over Core types only
+Authorization/          current user and policy handlers
+<Backend>Api/           API clients, their options, and their request and result types
+Browser/                IJSRuntime services
 _Imports.razor          at the project root, so it covers Features/ as well as Components/
 ```
-
-Placement follows the dependency direction. If something in `Infrastructure/` would have to reference a `Features.*` type, it belongs in the feature instead. A projection used by two features moves to `Infrastructure/` only once it depends on nothing but Core.
 
 ## Render mode
 

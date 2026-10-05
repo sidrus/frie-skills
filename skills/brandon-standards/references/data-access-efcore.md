@@ -61,7 +61,8 @@ internal sealed class SalesDbContext(DbContextOptions<SalesDbContext> options) :
         modelBuilder.Entity<Order>(order =>
         {
             order.HasKey(entity => entity.Id);
-            order.HasIndex(entity => new { entity.StoreId, entity.Number })
+            order
+                .HasIndex(entity => new { entity.StoreId, entity.Number })
                 .IsUnique()
                 .HasDatabaseName(OrderNumberIndex);
         });

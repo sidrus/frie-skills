@@ -6,6 +6,8 @@ Default to TDD for anything with real behavior. Agree the seams first, then go r
 
 The red run is watched. Execute the failing test and show its failure output before writing any implementation, on every cycle. Arranging test doubles for several slices up front, with no intervening red run, reads as skipping TDD.
 
+Run the red narrowly, with one filtered run per cycle such as `dotnet test --filter` or `uv run pytest -k`. The full gate runs once, at the end.
+
 ## Detroit school
 
 Tests are classical, not mockist. The unit under test is a behavior, not a class.
@@ -20,6 +22,7 @@ Tests are classical, not mockist. The unit under test is a behavior, not a class
 - No tests for 1:1 mappers, pass-through wrappers, options records, or path literals.
 - No feature-flag toggle tests. Test the implementations behind the flag, and never write a flag-off test.
 - No persistence round-trip or schema-confirmation tests, meaning save-then-read-back asserting a column value. The database does its job. Schema and migration changes are verified transitively, because behavior tests running against the real built schema fail loudly when the DDL is wrong.
+- A stored procedure is never the unit under test. It is exercised through the code that calls it, so a test class named after a procedure is the anti-pattern. A procedure nothing calls is dead and gets deleted, unless it was built recently for documented backlog work whose caller is still coming.
 - Endpoint authorization is one Theory of role to status code, with no side-effect assertions.
 - Don't chase a coverage percentage. If the behaviors are correct, assume the implementation is. Name an accepted coverage gap rather than adding an implementation-detail test to close it.
 
@@ -28,6 +31,7 @@ Tests are classical, not mockist. The unit under test is a behavior, not a class
 - Assert on values, never on booleans.
 - Assert on observable state, such as the persisted entity, the returned object's typed fields, the captured message, or the exception type and its structured properties. Never assert on strings, including exception messages, log output, rendered HTML, serialized payloads, `ToString()` output, and substring or regex matches against any of them. Rewording any of these breaks a string assertion with no change in behavior.
   - The one exception is a behavior whose observable output is the string itself, such as a CSV writer, a slug generator, or a wire format, and only when the spec gives the exact expected value. Assert full equality against that value.
+- Logs are never an assertion target, structured or not (`FakeLogger`, `caplog`, a substituted `ILogger`). If a test needs to know something, the system exposes it through its interfaces.
 - Assert against the generated source object rather than a re-derived expectation.
 
 ## Harness
@@ -56,11 +60,11 @@ Testcontainers for managed dependencies such as a database or cache. Mock only u
 
 ## Fixtures
 
-Fixtures stay byte-faithful. Commit the real artifact as received and decode it at read time.
+Fixtures stay byte-faithful. Commit the real artifact as received and decode it at read time. A Windows-1252 file is read with `Encoding.GetEncoding(1252)`, since `Encoding.Latin1` is not CP1252 and mangles 0x80 to 0x9F.
 
 ## Test data
 
-Every value a test builds comes from Faker: Bogus in .NET, Faker in Python. Generated data shows the behavior holds for any valid input, where a hand-picked literal shows it holds for one.
+Every value a test builds comes from Faker: Bogus in .NET, with `Soenneker.Utils.AutoBogus` where auto-generation is needed and never the abandoned `AutoBogus`, and Faker in Python. Generated data shows the behavior holds for any valid input, where a hand-picked literal shows it holds for one.
 
 - A literal appears only where the behavior under test depends on that exact value: a boundary, a format the code parses, or two values that must collide or differ. Everything else in the arrangement is generated, including names, identifiers, dates, and amounts.
 - Each domain type gets one `Faker<T>` in the test project, so a new required property is set in one place. A test overrides only the properties its behavior depends on.
