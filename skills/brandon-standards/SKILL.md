@@ -44,19 +44,11 @@ Three exceptions:
 - A non-obvious test double or support type gets a short XML doc saying why the type exists.
 - The reason on an approved suppression, per Suppressions below.
 
-When a comment **is** requested, write one terse line. Don't explain how a test works, don't restate the name of the thing being commented, and don't add a second line.
+The wording of comments, docs, and messages follows the `writing-style-guide` skill.
 
 If the user deleted a comment or a block of code, it stays deleted.
 
 A comment that turns out to be wrong or misleading gets deleted, not corrected. Rewriting it to be accurate is still adding a comment, and the code and config already say what is true.
-
-## Prose in docs and messages
-
-- American English spelling.
-- Write flowing grammatical sentences. Em-dash asides and colon-chained clauses read as AI-speak, so restructure them into full sentences rather than choppy fragments. Term-definition bullets and tables are fine.
-- Docs state project-specific facts only. Cut anything most developers already know.
-- Docs read as current state. Removing content means deleting it outright, with no "removed" note, no "formerly", and no reference to a superseded plan. One source of truth per topic, so a replaced plan doc is deleted rather than left beside its successor.
-- Temporary or one-off docs don't get linked from a docs index.
 
 ## Design
 
@@ -89,6 +81,6 @@ Static analysis findings are authoritative, and only an existing suppression opt
 ## Before claiming done
 
 1. Run the repo's gate command (its `CLAUDE.md` names it).
-2. Scan every touched file for comments you added without being asked, and for non-American spellings.
+2. Scan every touched file for comments you added without being asked.
 3. Confirm no new suppression was introduced.
 4. Report failures with their output. Never describe unverified work as passing.
