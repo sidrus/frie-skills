@@ -38,7 +38,7 @@ Who holds which *responsibility* is in `architecture.md`. This section covers on
 | Layer | Accepts | Returns |
 |---|---|---|
 | Data access | Domain records, primitives | Domain records, primitives |
-| Service | Domain records, primitives | `Result<T>` over domain records or primitives |
+| Service | Domain records, primitives | A `Result` over domain records or primitives |
 | Endpoint | `*Request` types | `*Response` types |
 
 The data-access layer is the repository under Dapper and the `DbContext` under EF Core. In both, a data entity stays inside it and never appears in a service or endpoint signature.

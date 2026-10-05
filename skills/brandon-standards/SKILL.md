@@ -20,7 +20,7 @@ Rules marked **(tooling)** are enforceable by an analyzer, `.editorconfig`, ruff
 | Touching | Read |
 |---|---|
 | designing anything: a new feature, a new type, a seam, a state change, a query, a service | `references/architecture.md` first. It decides what earns an interface, where logic lives, and what YAGNI does and does not govern. |
-| `*.cs` | `references/csharp.md`, and `references/dotnet-layering.md` for anything crossing a data-access, service, endpoint, or mapping boundary |
+| `*.cs` | `references/csharp.md`, `references/formatting.md` for line breaking and chain layout, and `references/dotnet-layering.md` for anything crossing a data-access, service, endpoint, or mapping boundary |
 | data access: a query, a write, a repository, a `DbContext`, an entity, a migration | `references/data-access-efcore.md` when the repo uses EF Core, `references/data-access-dapper.md` for Dapper or hand-written SQL |
 | `*.razor` or a Blazor project's CSS | `references/blazor.md` |
 | `*.py` | `references/python.md` |
@@ -30,14 +30,19 @@ Read the reference **before** the first edit, not as a check afterward. `csharp.
 
 Skip the references only for a change that touches no code, such as a docs or config edit. The rules below apply either way.
 
+## Naming
+
+Anything callable is named with a verb: methods, functions, private helpers, test helpers, pytest fixtures, and any named lambda. A noun name belongs to a value, meaning a property, field, or variable. `Code(string code)`, `RedisDatabase()`, and a fixture called `candidates` are all wrong.
+
 ## Comments and documentation
 
 **Never add a comment unless explicitly asked.** This is absolute and covers why-comments, test narration, config and YAML notes, cross-file coordination notes, and code blocks inside plans and specs. Rationale goes in the chat message instead, where it can be read once and discarded.
 
-Two exceptions:
+Three exceptions:
 
-- XML docs on the API surface, following the file's existing convention. Public and internal members are equivalent for this, since an internal-by-design assembly still has a cross-layer contract. Never downgrade an existing XML doc to `//`.
+- XML docs on the API surface, even when the rest of the file has none. Public and internal members are equivalent for this, since an internal-by-design assembly still has a cross-layer contract. Where both an interface and an implementing class exist, document the interface. Never downgrade an existing XML doc to `//`.
 - A non-obvious test double or support type gets a short XML doc saying why the type exists.
+- The reason on an approved suppression, per Suppressions below.
 
 When a comment **is** requested, write one terse line. Don't explain how a test works, don't restate the name of the thing being commented, and don't add a second line.
 
@@ -77,7 +82,9 @@ Full detail in `references/testing.md`. These are never negotiable:
 
 ## Suppressions
 
-Never suppress a warning. No `#pragma`, no `[SuppressMessage]`, no csproj `<NoWarn>`, no bare `# noqa` or `# type: ignore`. This includes analyzer style rules. Fix every call site instead. If a warning is a genuine false positive, ask before suppressing it, and when a suppression is approved, explain it inline.
+Never suppress a warning, including analyzer style rules. Redesign so the warning does not fire, at every call site. That rules out `#pragma`, `[SuppressMessage]`, csproj `<NoWarn>`, `# noqa`, and `# type: ignore`. If a warning is a genuine false positive, ask. An approved suppression carries its reason in `Justification` where the mechanism has that field, and on the pragma line where it does not.
+
+Static analysis findings are authoritative, and only an existing suppression opts out of one. Where a finding contradicts a convention in this skill, the finding wins at the line it flags and the convention holds everywhere else.
 
 ## Before claiming done
 

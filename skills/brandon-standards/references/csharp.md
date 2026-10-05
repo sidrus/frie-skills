@@ -11,18 +11,28 @@
 
 - `string.Empty`, never `""`. This includes defaults, coalescing, and query comparisons. Under a LINQ provider it also translates correctly, so EF turns `!= string.Empty` into `<> ''`.
 - Domain and API collections are non-null `IReadOnlyList<T>` initialized to `[]`. Nullability on a collection belongs only on a data entity, so the column stores NULL rather than `'[]'`; convert empty to null and back in the mapping layer.
-- No inline constant arrays at repeated call sites, which is CA1861 **(tooling)**. Hoist to a `private static readonly T[] _camelCase` field.
+- No inline constant arrays at repeated call sites, which is CA1861 **(tooling)**. Hoist to a `private static readonly T[]` field.
 
 ## File and member layout
 
 - One type per file.
 - Types that bind to `IOptions` are records.
 - Expression-bodied members put `=>` at the end of the signature line, the conventional trailing placement.
+- Private `static readonly` fields are `_camelCase`.
+
+## Signatures
+
+- Two parameters at most, plus a trailing `CancellationToken`.
+- When a signature needs more, fold the extras into a type that already exists. A new record whose only purpose is to carry arguments is a last resort.
+- A value that is constant per call site rather than per call is not a parameter. Hoist each combination to a `private static readonly` field and pass that.
+- No unused parameters. That includes a `CancellationToken` the library underneath gives no way to pass on, and a parameter kept only because a sibling method takes one.
+- These limits govern signatures you design. Where a framework dictates the shape, such as a route handler binding path values alongside injected services, a generated partial, or a delegate matching a library's signature, they do not apply.
 
 ## Naming
 
-- Method names are verbs. Nouns are properties. This applies to test helpers too.
+- A member that only returns a value is a property, never a noun-named method. The verb rule for everything callable is in `SKILL.md`.
 - Return the concrete type when it is known, so `MemoryStream` rather than `Stream`.
+- The cancellation token parameter is `cancellationToken`, never `ct`.
 
 ## Logging
 
