@@ -20,7 +20,7 @@ A separate `*Entity` with `*EntityMappingExtensions.cs` earns its place only whe
 
 - Reads are `AsNoTracking`. Records compare by value, so tracking stays short-lived and deliberate.
 - A read that needs part of a record projects with `Select` rather than materializing the whole row.
-- Every list read is bounded, per the performance rules in `architecture.md`.
+- Every list read is bounded, per the performance rules in `engineering-patterns`.
 - A filter or ordering used by more than one query is a static extension over `IQueryable<T>` in a `*QueryExtensions.cs` beside the context, using an `extension(IQueryable<T>)` block. That keeps query logic DRY and pure, with nothing to inject.
 
 ## Writes

@@ -1,17 +1,18 @@
 # C# Style
 
+`dotnet-skills:csharp-coding-standards` covers what this file and `engineering-patterns` don't.
+
 ## Nullability
 
 - `is null` and `is not null`, never `== null`. No first-party analyzer covers this. Roslynator RCS1248 does, and it correctly leaves expression trees alone, so in a repo carrying that package with `dotnet_diagnostic.RCS1248.severity = warning` this is **(tooling)**. Everywhere else it is on you.
   - Exception: expression-tree lambdas require `== null`, because `is null` is CS8122 there **(tooling)**. A collection expression `[]` is likewise CS9175 in an expression tree, so use `Array.Empty<T>()`. Don't comment either exception. In practice this only comes up with a LINQ provider, so EF `HasConversion`, `ValueComparer`, and LINQ-to-entities predicates. It never arises in Dapper, where the predicate is SQL.
-- Never the null-forgiving `!`. Use `?.` with a `?? fallback`, or a guard that fails loudly.
-- No redundant null guards. If the target accepts null, assign directly rather than wrapping the assignment in `if (x is not null)`.
+- The non-null assertion is the null-forgiving `!`. Use `?.` with a `?? fallback`, or a guard that fails loudly.
 
 ## Values and collections
 
 - `string.Empty`, never `""`. This includes defaults, coalescing, and query comparisons. Under a LINQ provider it also translates correctly, so EF turns `!= string.Empty` into `<> ''`.
-- Domain and API collections are non-null `IReadOnlyList<T>` initialized to `[]`. Nullability on a collection belongs only on a data entity, so the column stores NULL rather than `'[]'`; convert empty to null and back in the mapping layer.
-- No inline constant arrays at repeated call sites, which is CA1861 **(tooling)**. Hoist to a `private static readonly T[]` field.
+- Domain and API collections are `IReadOnlyList<T>` initialized to `[]`.
+- A hoisted constant array is a `private static readonly T[]` field. Inline constant arrays at repeated call sites are CA1861 **(tooling)**.
 
 ## File and member layout
 
@@ -20,25 +21,28 @@
 - Expression-bodied members put `=>` at the end of the signature line, the conventional trailing placement.
 - Private `static readonly` fields are `_camelCase`.
 
-## Signatures
+## Signatures and naming
 
-- Two parameters at most, plus a trailing `CancellationToken`.
-- When a signature needs more, fold the extras into a type that already exists. A new record whose only purpose is to carry arguments is a last resort.
-- A value that is constant per call site rather than per call is not a parameter. Hoist each combination to a `private static readonly` field and pass that.
-- No unused parameters. That includes a `CancellationToken` the library underneath gives no way to pass on, and a parameter kept only because a sibling method takes one.
-- These limits govern signatures you design. Where a framework dictates the shape, such as a route handler binding path values alongside injected services, a generated partial, or a delegate matching a library's signature, they do not apply.
-
-## Naming
-
-- A member that only returns a value is a property, never a noun-named method. The verb rule for everything callable is in `SKILL.md`.
+- The trailing cancellation parameter is a `CancellationToken` named `cancellationToken`, never `ct`.
+- A value hoisted out of a signature is a `private static readonly` field.
+- A member that only returns a value is a property, never a noun-named method.
 - Return the concrete type when it is known, so `MemoryStream` rather than `Stream`.
-- The cancellation token parameter is `cancellationToken`, never `ct`.
+
+## Doc comments
+
+XML docs go on the API surface, even when the rest of the file has none. Public and internal members are equivalent for this, since an internal-by-design assembly still has a cross-layer contract.
 
 ## Logging
 
 Every log call goes through `[LoggerMessage]` source generation: `public static partial void X(this ILogger logger, ...)` extension methods in one `*Log.cs` static partial class per feature.
 
 This is CA1848 **(tooling)** where the repo sets `dotnet_diagnostic.CA1848.severity = warning`. CA rules run during build with no extra property or package, so a direct `logger.LogInformation(...)` call fails the build rather than waiting for review.
+
+A catch that expects its exception logs through the feature's `*Log.cs` extensions.
+
+## Observability
+
+`ILogger` is the logging framework the observability floor routes through OpenTelemetry. For setup, semantic conventions, exporter configuration, and instrumentation API details, read `dotnet-skills:opentelementry-dotnet-instrumentation`, plus `dotnet-skills:aspire-service-defaults` when the shared wiring belongs in one place. `engineering-patterns` decides what must be instrumented and what earns a metric, and those cover how to wire it.
 
 ## HTTP
 
@@ -47,9 +51,7 @@ This is CA1848 **(tooling)** where the repo sets `dotnet_diagnostic.CA1848.sever
 
 ## Control flow
 
-- Braces on every control-flow body, including single-line ones. This is IDE0011 via `csharp_prefer_braces`, but an `IDE*` rule only fires during build when the project sets `EnforceCodeStyleInBuild`, so in a repo without that property it is an IDE-only hint and still on you to get right.
-- Keep dispatch as a readable pattern-match switch. Bolt a narrow edge case on as an early guard rather than restructuring the switch around it.
-- No empty catch blocks. Log at least at Trace through the feature's `*Log.cs` extensions, even for an expected shutdown-path exception such as `OperationCanceledException`.
+Braces on every body are IDE0011 via `csharp_prefer_braces`, but an `IDE*` rule only fires during build when the project sets `EnforceCodeStyleInBuild`, so in a repo without that property it is an IDE-only hint and still on you to get right.
 
 ## Await
 
@@ -61,9 +63,19 @@ var saved = await File.ReadAllBytesAsync(path, cancellationToken);
 saved.Should().StartWith([0xEF, 0xBB, 0xBF]);
 ```
 
-## Config files
+## Suppressions
 
-No empty sections in `.editorconfig` or similar config files.
+The ruled-out mechanisms are `#pragma`, `[SuppressMessage]`, and csproj `<NoWarn>`. An approved `[SuppressMessage]` carries its reason in `Justification`, and an approved `#pragma` carries it on the pragma line.
+
+## Tests
+
+- Names are `Method_ExpectedBehavior_Condition`, such as `Ship_RejectsOrder_WhenAlreadyShipped`.
+- Run the red with `dotnet test --filter`.
+- Endpoint authorization is one `Theory` of role to status code.
+- Test data comes from Bogus, with `Soenneker.Utils.AutoBogus` where auto-generation is needed and never the abandoned `AutoBogus`. Each domain type gets one `Faker<T>`.
+- The shared test-support module is one TestSupport project referenced by every test project.
+- Integration tests live in a separate `*.IntegrationTests` project.
+- A Windows-1252 fixture is read with `Encoding.GetEncoding(1252)`, since `Encoding.Latin1` is not CP1252.
 
 ## Canonical shapes
 
@@ -77,8 +89,8 @@ internal static partial class OrderLog
     [LoggerMessage(Level = LogLevel.Information, Message = "Order {OrderId} shipped with {Count} lines")]
     public static partial void OrderShipped(this ILogger logger, long orderId, int count);
 
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Order polling loop cancelled during shutdown")]
-    public static partial void LoopCancelled(this ILogger logger);
+    [LoggerMessage(Level = LogLevel.Trace, Message = "Order polling loop canceled during shutdown")]
+    public static partial void LoopCanceled(this ILogger logger);
 }
 ```
 
@@ -113,6 +125,6 @@ A catch that expects the exception still logs:
 ```csharp
 catch (OperationCanceledException)
 {
-    logger.LoopCancelled();
+    logger.LoopCanceled();
 }
 ```

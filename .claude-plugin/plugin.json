@@ -1,14 +1,16 @@
 {
   "name": "frie-skills",
-  "version": "1.4.0",
-  "description": "Brandon Frie's coding standards and architecture rules for C#, .NET, Blazor, and Python, and his prose style guide.",
+  "version": "2.0.0",
+  "description": "Brandon Frie's engineering patterns, language standards, NeoForge conventions, and prose style.",
   "author": {
     "name": "Brandon Frie"
   },
   "repository": "https://github.com/sidrus/frie-skills",
   "license": "MIT",
   "skills": [
+    "./skills/engineering-patterns",
     "./skills/brandon-standards",
+    "./skills/neoforge-modding",
     "./skills/writing-style-guide"
   ]
 }

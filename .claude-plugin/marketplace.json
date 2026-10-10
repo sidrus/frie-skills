@@ -8,7 +8,7 @@
     {
       "name": "frie-skills",
       "source": "./",
-      "description": "Brandon Frie's coding standards and architecture rules for C#, .NET, Blazor, and Python, and his prose style guide.",
+      "description": "Brandon Frie's engineering patterns, language standards, NeoForge conventions, and prose style.",
       "category": "engineering"
     }
   ]
