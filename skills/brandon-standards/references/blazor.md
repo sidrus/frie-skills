@@ -18,13 +18,7 @@ Extract repeated markup into a component. If the same structure appears in two o
 
 ## Project layout
 
-The folder tree is a map of the application. Reading it alone should give a general sense of every feature, shared component, and system the app has.
-
-- **Similar code lives together.** Code that serves one feature, component, or system sits in one folder, so a change to it touches one place.
-- **Every folder names what it is for.** A folder is named for a feature (`Orders/`), a component, or a system (`Authorization/`, `SalesApi/`). Never for a kind of type (`Models/`, `Extensions/`, `Helpers/`) or a grab bag (`Infrastructure/`, `Common/`, `Utils/`), because those hide what the code does.
-- **A type lives beside its consumer.** A type that one feature uses goes in that feature, and a type that only a shared component uses goes beside that component. A type moves outward only when a second consumer appears, and then only as far as the nearest folder both consumers share.
-
-Feature-first, mirroring the server's `Features/<Feature>/` convention, is one layout that meets these outcomes:
+The code layout outcomes in the `engineering-patterns` architecture reference apply. A type that only a shared component uses goes beside that component. Feature-first, mirroring the server's `Features/<Feature>/` convention, is one layout that meets those outcomes:
 
 ```
 Features/<Feature>/     page + feature-only components + view records + feature projections and parsers

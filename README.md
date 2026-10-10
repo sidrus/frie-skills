@@ -4,8 +4,12 @@ Brandon Frie's agent skills, packaged as a Claude Code plugin.
 
 | Skill | Purpose |
 |---|---|
-| `brandon-standards` | Coding standards and architecture rules for C#, .NET, Blazor, and Python |
+| `engineering-patterns` | Language-neutral rules for design, architecture, testing, comments, and suppressions |
+| `brandon-standards` | How C#, .NET, Blazor, Python, and Java express those rules in their own idioms |
+| `neoforge-modding` | NeoForge Minecraft mod conventions, layered on the Java rules |
 | `writing-style-guide` | Prose style for docs, code comments, commit messages, and chat |
+
+The code skills compose by layer, and each states a rule once. `neoforge-modding` invokes `brandon-standards`, which invokes `engineering-patterns`. A new language is a reference file under `brandon-standards`, and a new framework is a skill that invokes `brandon-standards`.
 
 ## Install
 
