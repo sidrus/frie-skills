@@ -5,6 +5,8 @@ The rules here hold whatever the data-access library. The data-access layer itse
 - **EF Core**: `data-access-efcore.md`. The repo is on EF Core when its data-access project references `Microsoft.EntityFrameworkCore.*`.
 - **Dapper** or other hand-written SQL: `data-access-dapper.md`.
 
+For the query-level mechanics behind the performance rules in `engineering-patterns`, read `dotnet-skills:database-performance` and `dotnet-skills:efcore-patterns`. The performance rules decide *which* fix to reach for and in what order, and those cover how to write it.
+
 ## Which project owns a type
 
 A type belongs to the project that **consumes** it, not the one it feels thematically related to.
@@ -33,7 +35,7 @@ A type never serves two of these categories.
 
 ## Which types may appear where
 
-Who holds which *responsibility* is in `architecture.md`. This section covers only which types are allowed to appear in a signature.
+Who holds which *responsibility* is in the `engineering-patterns` architecture reference. This section covers only which types are allowed to appear in a signature.
 
 | Layer | Accepts | Returns |
 |---|---|---|

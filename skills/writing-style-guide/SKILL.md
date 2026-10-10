@@ -1,6 +1,6 @@
 ---
 name: writing-style-guide
-description: Prose style for documentation, code comments, XML docs and docstrings, commit and PR messages, tickets, and chat replies. Use whenever you write, edit, or review prose of any kind, including READMEs, changelogs, docstrings, commit messages, and tickets, even when another skill also covers the task.
+description: Prose style for documentation, code comments, XML docs, Javadoc, and docstrings, commit and PR messages, tickets, and chat replies. Use whenever you write, edit, or review prose of any kind, including READMEs, changelogs, docstrings, commit messages, and tickets, even when another skill also covers the task.
 ---
 
 # Writing Style Guide
