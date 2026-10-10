@@ -6,7 +6,7 @@
 
 - `is null` and `is not null`, never `== null`. No first-party analyzer covers this. Roslynator RCS1248 does, and it correctly leaves expression trees alone, so in a repo carrying that package with `dotnet_diagnostic.RCS1248.severity = warning` this is **(tooling)**. Everywhere else it is on you.
   - Exception: expression-tree lambdas require `== null`, because `is null` is CS8122 there **(tooling)**. A collection expression `[]` is likewise CS9175 in an expression tree, so use `Array.Empty<T>()`. Don't comment either exception. In practice this only comes up with a LINQ provider, so EF `HasConversion`, `ValueComparer`, and LINQ-to-entities predicates. It never arises in Dapper, where the predicate is SQL.
-- The non-null assertion is the null-forgiving `!`. Use `?.` with a `?? fallback`, or a guard that fails loudly.
+- Never the null-forgiving `!`. Use `?.` with a `?? fallback`, or a guard that fails loudly.
 
 ## Values and collections
 
@@ -42,7 +42,7 @@ A catch that expects its exception logs through the feature's `*Log.cs` extensio
 
 ## Observability
 
-`ILogger` is the logging framework the observability floor routes through OpenTelemetry. For setup, semantic conventions, exporter configuration, and instrumentation API details, read `dotnet-skills:opentelementry-dotnet-instrumentation`, plus `dotnet-skills:aspire-service-defaults` when the shared wiring belongs in one place. `engineering-patterns` decides what must be instrumented and what earns a metric, and those cover how to wire it.
+Serilog is the logging framework. It is registered as the `ILogger` provider, so the `[LoggerMessage]` calls flow through it, and it exports to OpenTelemetry through `Serilog.Sinks.OpenTelemetry`. For setup, semantic conventions, exporter configuration, and instrumentation API details, read `dotnet-skills:opentelementry-dotnet-instrumentation`, plus `dotnet-skills:aspire-service-defaults` when the shared wiring belongs in one place. `engineering-patterns` decides what must be instrumented and what earns a metric, and those cover how to wire it.
 
 ## HTTP
 

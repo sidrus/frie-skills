@@ -11,7 +11,7 @@ Spotless with palantir-java-format owns all layout **(tooling)**. Run `./gradlew
 - Every package carries a `package-info.java` annotated `@NullMarked` from JSpecify, so everything is non-null unless marked.
 - `@Nullable` from `org.jspecify.annotations` marks each exception, in type-use position: `@Nullable Address`, `String @Nullable []`. First-party code uses no other nullness annotation family, such as `javax.annotation` or `org.jetbrains.annotations`.
 - NullAway runs under Error Prone at error severity **(tooling)**.
-- `Objects.requireNonNull` is a guard that fails loudly, so it belongs where a null means a bug. The non-null assertion that only silences the checker is NullAway's `castToNonNull` or an `assert`, which is off at runtime.
+- `Objects.requireNonNull` is a guard that fails loudly, so it belongs where a null means a bug. Never NullAway's `castToNonNull` or an `assert`, which is off at runtime.
 - Java has only `== null`, so that is the comparison.
 - `Optional` is a return type only, never a field, a parameter, or a collection element. Consume it with `map`, `orElse`, `ifPresentOrElse`, or `orElseThrow()` after an emptiness guard.
 

@@ -44,7 +44,7 @@ Anything callable is named with a verb: methods, functions, private helpers, tes
 
 ## Values and absence
 
-- Handle absence explicitly, with a guard that fails loudly or with a fallback. Never use a non-null assertion that only silences the checker.
+- Handle absence explicitly, with a guard that fails loudly or with a fallback. Never use a non-null assertion.
 - No redundant null guards. If the target accepts null, assign directly.
 - Collections are never null. Empty is the absent case, initialized to the language's empty literal. Nullability on a collection belongs only on a persistence type, so the column stores NULL rather than an empty array, and the mapping converts empty to null and back.
 - No inline constant arrays at repeated call sites. Hoist them to a named constant.
