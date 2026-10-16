@@ -9,7 +9,14 @@ description: NeoForge Minecraft mod conventions, layered on the brandon-standard
 
 ## Version
 
-Read `minecraft_version` and `neo_version` from `gradle.properties` before writing mod code. Registries, events, networking, data generation, GameTests, and serialization APIs all change between Minecraft versions, so look up each API on `docs.neoforged.net` for that exact version rather than from memory. Vanilla Minecraft has no published API documentation, so its behavior comes from the decompiled sources that ModDevGradle attaches to the workspace, with Parchment parameter names where the repo configures Parchment.
+Read `minecraft_version` and `neo_version` from `gradle.properties` before writing mod code, then read the reference for that NeoForge version. It gives the version's APIs for events, registration, data generation, and GameTests.
+
+| `neo_version` | Reference |
+|---|---|
+| 21.0 and 21.1 (Minecraft 1.21 and 1.21.1) | `references/neoforge-21.1.md` |
+| 21.4 and later (Minecraft 1.21.4 onward) | `references/neoforge-21.4.md` |
+
+Registries, events, networking, data generation, GameTests, and serialization APIs all change between versions. An API the reference does not name, or a version with no reference, is looked up on `docs.neoforged.net` for that exact version rather than from memory. Vanilla Minecraft has no published API documentation, so its behavior comes from the decompiled sources that ModDevGradle attaches to the workspace, with Parchment parameter names where the repo configures Parchment.
 
 ## Entry points and decisions
 
@@ -45,15 +52,15 @@ Prefer, in order: an event, a NeoForge extension hook or interface, an access tr
 
 ## Data generation
 
-- Every asset and data file that a data provider can produce comes from data generation: models, blockstates, client items, loot tables, recipes, tags, advancements, data maps, language files, and datapack registry entries. Hand-written JSON in `src/main/resources` is only for files no provider covers and for complex models authored in Blockbench.
+- Every asset and data file that a data provider can produce comes from data generation: models, blockstates, loot tables, recipes, tags, advancements, data maps, language files, and datapack registry entries. Hand-written JSON in `src/main/resources` is only for files no provider covers and for complex models authored in Blockbench.
 - Output goes to `src/generated/resources`, which the main source set includes as a resource directory and git tracks. A generated file changes only through its provider and a rerun. The `.cache` directory is gitignored and excluded from the jar.
-- One data run generates assets and data together with `--all`. Where the version splits the gather event into client and server events, every provider registers on the client event, because NeoForge discourages separate client and server data runs.
-- Provider code lives in a `datagen` source set that the data run uses and the jar never contains. One subscriber in it registers every provider. Its packages are named for the data kind (`loot`, `recipe`, `tag`, `model`, `lang`), because each provider covers one kind across every feature. A provider that spans many features splits into one class per feature or recipe type, which the kind's provider calls.
-- Datapack registry entries are built in a `RegistrySetBuilder` that registers before any other provider, so the lookup every later provider receives contains them. Each entry's `ResourceKey` is a constant in its feature package, shared by game code and datagen.
+- One data run generates assets and data together with `--all`, and one gather-data handler registers every provider. The version reference gives the run type and the event's API.
+- Provider code lives in a `datagen` source set that the data run uses and the jar never contains. Its packages are named for the data kind (`loot`, `recipe`, `tag`, `model`, `lang`), because each provider covers one kind across every feature. A provider that spans many features splits into one class per feature or recipe type, which the kind's provider calls.
+- Datapack registry entries are built in a `RegistrySetBuilder` that registers before any other provider, and every later provider receives a lookup that contains them. The version reference says where that lookup comes from. Each entry's `ResourceKey` is a constant in its feature package, shared by game code and datagen.
 - Coverage validation stays on. The loot table provider's known blocks are the mod's registered blocks, so a block without a loot table fails the run, and a coverage failure is fixed by generating the missing file.
 - The language provider takes block, item, and entity names from their registered holders, and fails the run when a registered object has no English name.
 - A material that another mod could also supply, such as an ingot, ore, or dust, carries the `c` namespace common tag, and recipes take that tag in place of the mod's own item. A tag key is a constant created once, and an item tag that mirrors a block tag is copied from the block tag.
-- A recipe ID is `<modid>:<recipe type>/<name>`, such as `examplemod:crushing/iron_ore`. Data that depends on an optional mod carries a mod-loaded condition.
+- Every recipe saves with an explicit ID of the form `<modid>:<recipe type>/<name>`, such as `examplemod:crushing/iron_ore`. Data that depends on an optional mod carries a mod-loaded condition.
 
 ## Text and serialization
 
@@ -79,7 +86,7 @@ Rejected on sight, alongside the shared list: unbounded work in a per-tick path,
 Two tiers, and the gate runs both.
 
 - **Unit tests** run on JUnit through ModDevGradle's `unitTest` support and `net.neoforged:testframework`. Registries and the mod load, but no level exists, so a unit test never touches a real world. World reads and writes go through a map-backed fake that implements the narrow vanilla interfaces, kept in the test fixtures.
-- **GameTests** cover behavior that needs a real world: entities, block updates, structure placement, and events end to end. They live in a `gameTest` source set that the dev runs bind to the mod and the jar never contains, in the same packages as the code they test so they can reach package-private members. Look up the GameTest registration API for the repo's version.
+- **GameTests** cover behavior that needs a real world: entities, block updates, structure placement, and events end to end. They live in a `gameTest` source set that the dev runs bind to the mod and the jar never contains, in the same packages as the code they test so they can reach package-private members. The version reference gives the registration API.
 - A GameTest name becomes a resource path, so it is lowercase snake case while keeping all three parts, such as `admits_refuses_zombie_when_destination_is_mining_dimension`.
 - The GameTest helper's assertions are the assertion library inside a GameTest.
 - The gate is the data run with a check that `git status --porcelain` prints nothing, then `./gradlew build`, then the repo's GameTest server run, unless the repo's `CLAUDE.md` or `AGENTS.md` names others. The client and server dev runs are not part of the gate.
