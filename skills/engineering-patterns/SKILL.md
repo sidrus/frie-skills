@@ -19,7 +19,7 @@ Each rule states an intent, and each language expresses it in its own idiom. Whe
 
 Existing code that disagrees with these skills is drift, not precedent. Write to the skills unless the repo's `CLAUDE.md` or `AGENTS.md` overrides them.
 
-Rules marked **(tooling)** are enforceable by an analyzer, formatter, or type checker, but whether they are enforced is per repo. Check what the repo actually configures. Where a rule is enforced, write it right the first time and don't spend review comments on it, because the build catches it. Where it isn't, the rule still holds and it's on you.
+Rules marked **(tooling)** are enforceable by an analyzer, formatter, or type checker, but whether they are enforced is per repo. Check what the repo actually configures. Where a rule is enforced, write it correctly the first time and don't spend review comments on it, because the build catches it. Where it isn't, the rule still holds and you apply it by hand.
 
 ## Read the reference for what you touch
 
@@ -52,7 +52,7 @@ Anything callable is named with a verb: methods, functions, private helpers, tes
 ## Control flow
 
 - In languages with braces, every control-flow body gets them, including single-line bodies.
-- Keep dispatch as a readable pattern-match switch. Bolt a narrow edge case on as an early guard rather than restructuring the switch around it.
+- Keep dispatch as a readable pattern-match switch. Handle a narrow edge case with an early guard rather than restructuring the switch around it.
 - No empty catch blocks. Log at least at trace level, even for an expected shutdown-path exception such as cancellation.
 
 ## Comments and documentation
@@ -84,7 +84,7 @@ These apply to every decision regardless of layer. Structure, state, performance
 
 ## Testing, in brief
 
-Full detail in `references/testing.md`. These are never negotiable:
+`references/testing.md` has the full detail. These are never negotiable:
 
 - TDD for anything with real behavior. Run the failing test and show its output before writing implementation, every cycle.
 - Behavior only. No tests for 1:1 mappers, pass-through wrappers, options records, path literals, or feature-flag toggles, and no chasing a coverage percentage.

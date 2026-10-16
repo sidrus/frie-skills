@@ -5,7 +5,7 @@ The rules here hold whatever the data-access library. The data-access layer itse
 - **EF Core**: `data-access-efcore.md`. The repo is on EF Core when its data-access project references `Microsoft.EntityFrameworkCore.*`.
 - **Dapper** or other hand-written SQL: `data-access-dapper.md`.
 
-For the query-level mechanics behind the performance rules in `engineering-patterns`, read `dotnet-skills:database-performance` and `dotnet-skills:efcore-patterns`. The performance rules decide *which* fix to reach for and in what order, and those cover how to write it.
+For the query-level mechanics behind the performance rules in `engineering-patterns`, read `dotnet-skills:database-performance` and `dotnet-skills:efcore-patterns`. The performance rules decide *which* fix to apply and in what order, and those skills cover how to write it.
 
 ## Which project owns a type
 
@@ -17,7 +17,7 @@ A type belongs to the project that **consumes** it, not the one it feels themati
 | Data | Data-access plumbing shared by several projects: the connection factory or `DbContext`, data entities, and migration artifacts. Nothing else. Plumbing used by one project lives in that project. |
 | Worker, Blazor, and other leaf projects | Project-internal types. If one project uses it, it lives there, even when it models a business concept. |
 
-Don't pre-emptively promote a type to Core. Move it when a second project actually needs it.
+Don't preemptively promote a type to Core. Move it when a second project actually needs it.
 
 One exception: API request and response types stay in Core even when a single project serves them, because their consumer is the external HTTP caller rather than a project.
 
@@ -75,7 +75,7 @@ A repo may exempt specific files from the entity-versus-API split, such as an ex
 
 Match these shapes rather than re-deriving them from the rules above. The data-access shapes are in the matching data-access file.
 
-Both directions of the entity boundary in one file, `extension(T)` blocks, `internal`, empty converted to null on the way down:
+Both directions of the entity boundary in one `internal` file of `extension(T)` blocks, with empty collections converted to null on the way down:
 
 ```csharp
 internal static class OrderEntityMappingExtensions

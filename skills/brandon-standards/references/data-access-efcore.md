@@ -12,7 +12,7 @@ EF already provides the repository and the unit of work. `DbSet<T>` is the repos
 
 ## Domain records are the mapped types
 
-The domain record is what `DbSet<T>` holds. Column shape differences are bridged in `OnModelCreating`: value conversions, owned types, JSON columns, and a `ValueComparer` for converted collections. Expression-tree lambdas in that configuration follow the `== null` and `Array.Empty<T>()` exceptions in `csharp.md`.
+The domain record is what `DbSet<T>` holds. `OnModelCreating` covers differences in column shape with value conversions, owned types, JSON columns, and a `ValueComparer` for converted collections. Expression-tree lambdas in that configuration follow the `== null` and `Array.Empty<T>()` exceptions in `csharp.md`.
 
 A separate `*Entity` with `*EntityMappingExtensions.cs` earns its place only when model configuration cannot express the difference between the table and the record. Then it follows the entity rules in `data-access-dapper.md` for that one type.
 
@@ -31,11 +31,11 @@ A separate `*Entity` with `*EntityMappingExtensions.cs` earns its place only whe
 
 ## Constraint violations
 
-Integrity lives in the database, so a write can come back as a constraint violation. The service classifies it at the call site, catching `DbUpdateException` and dispatching on the provider exception's structured fields: `SqlState` and `ConstraintName` for Npgsql. The constraint name is a `const` on the context, passed to `HasDatabaseName` or `HasName` in the model and matched in the catch filter, so the two cannot drift.
+Integrity lives in the database, so a write can come back as a constraint violation. The service classifies it at the call site, catching `DbUpdateException` and dispatching on the provider exception's structured fields, which are `SqlState` and `ConstraintName` for Npgsql. The constraint name is a `const` on the context, passed to `HasDatabaseName` or `HasName` in the model and matched in the catch filter, so the two cannot drift.
 
 ## Schema and migrations
 
-- A context in a modular solution owns a schema: `HasDefaultSchema`, plus `MigrationsHistoryTable` in that same schema, so each module's migrations are independent.
+- A context in a modular solution owns a schema. It sets `HasDefaultSchema` and puts `MigrationsHistoryTable` in that same schema, so each module's migrations are independent.
 - Migrations are generated with `dotnet ef migrations add` against the context and committed alongside the model change that produced them.
 
 ## Testing
@@ -44,7 +44,7 @@ Integration tests run against the real provider through Testcontainers. The EF i
 
 ## Canonical shapes
 
-The context, internal, with its schema and a named constraint:
+The `internal` context, with its schema and a named constraint:
 
 ```csharp
 internal sealed class SalesDbContext(DbContextOptions<SalesDbContext> options) : DbContext(options)

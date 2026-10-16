@@ -6,13 +6,13 @@ A Blazor project has a component library, and which one it is varies. Identify i
 
 ## Styling
 
-Reach for styling in this order: the component library's own utility classes, then custom CSS, then inline `style=`. Inline is for a value that is genuinely one-off.
+Apply styling in this order: the component library's own utility classes, then custom CSS, then inline `style=`. Inline is for a value that is genuinely one-off.
 
 Custom CSS goes in scoped `.razor.css` files where the component library supports it, unless the repo's own instructions choose a global stylesheet. Scoped CSS that has to reach into a child component's markup needs `::deep`.
 
 ## Components
 
-Prefer a component from the library over raw HTML in every case where one fits. Use the library's grid, button, and dialog rather than hand-rolling the markup for them. Drop to raw HTML only where the library has nothing for what you need.
+Prefer a component from the library over raw HTML in every case where one fits. Use the library's grid, button, and dialog rather than writing the markup for them by hand. Use raw HTML only where the library has nothing for what you need.
 
 Extract repeated markup into a component. If the same structure appears in two or more places, it belongs in its own `.razor` file.
 
@@ -37,4 +37,4 @@ The app sets its render mode once, on `<Routes>` in `App.razor`, so the whole ap
 
 ## Cancellation
 
-A component that calls a backend inherits the project's cancellable component base and passes its token. Override `Dispose(bool)`, calling `base.Dispose(disposing)`, for subscriptions. Don't hand-roll a `CancellationTokenSource` field plus `IDisposable`.
+A component that calls a backend inherits the project's cancellable component base and passes its token. Override `Dispose(bool)`, calling `base.Dispose(disposing)`, for subscriptions. Don't write your own `CancellationTokenSource` field plus `IDisposable`.
