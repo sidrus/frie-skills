@@ -43,9 +43,20 @@ NeoForge has two buses: the mod bus for lifecycle and registration events, and t
 
 Prefer, in order: an event, a NeoForge extension hook or interface, an access transformer, and then a mixin. A mixin is the last resort, uses the narrowest injection that works, and never uses `@Overwrite`.
 
-## Data and text
+## Data generation
 
-- Every asset and data file that a data provider can produce comes from data generation: models, blockstates, loot tables, tags, recipes, language files, and datapack registry entries. The generated output is committed and never edited by hand. Hand-written JSON is only for files no provider covers.
+- Every asset and data file that a data provider can produce comes from data generation: models, blockstates, client items, loot tables, recipes, tags, advancements, data maps, language files, and datapack registry entries. Hand-written JSON in `src/main/resources` is only for files no provider covers and for complex models authored in Blockbench.
+- Output goes to `src/generated/resources`, which the main source set includes as a resource directory and git tracks. A generated file changes only through its provider and a rerun. The `.cache` directory is gitignored and excluded from the jar.
+- One data run generates assets and data together with `--all`. Where the version splits the gather event into client and server events, every provider registers on the client event, because NeoForge discourages separate client and server data runs.
+- Provider code lives in a `datagen` source set that the data run uses and the jar never contains. One subscriber in it registers every provider. Its packages are named for the data kind (`loot`, `recipe`, `tag`, `model`, `lang`), because each provider covers one kind across every feature. A provider that spans many features splits into one class per feature or recipe type, which the kind's provider calls.
+- Datapack registry entries are built in a `RegistrySetBuilder` that registers before any other provider, so the lookup every later provider receives contains them. Each entry's `ResourceKey` is a constant in its feature package, shared by game code and datagen.
+- Coverage validation stays on. The loot table provider's known blocks are the mod's registered blocks, so a block without a loot table fails the run, and a coverage failure is fixed by generating the missing file.
+- The language provider takes block, item, and entity names from their registered holders, and fails the run when a registered object has no English name.
+- A material that another mod could also supply, such as an ingot, ore, or dust, carries the `c` namespace common tag, and recipes take that tag in place of the mod's own item. A tag key is a constant created once, and an item tag that mirrors a block tag is copied from the block tag.
+- A recipe ID is `<modid>:<recipe type>/<name>`, such as `examplemod:crushing/iron_ore`. Data that depends on an optional mod carries a mod-loaded condition.
+
+## Text and serialization
+
 - User-facing text is a translation key passed to `Component.translatable`, with the English text in the generated `en_us` language file.
 - Serialization uses a `Codec` or `StreamCodec` wherever the version's API accepts one.
 
@@ -71,7 +82,7 @@ Two tiers, and the gate runs both.
 - **GameTests** cover behavior that needs a real world: entities, block updates, structure placement, and events end to end. They live in a `gameTest` source set that the dev runs bind to the mod and the jar never contains, in the same packages as the code they test so they can reach package-private members. Look up the GameTest registration API for the repo's version.
 - A GameTest name becomes a resource path, so it is lowercase snake case while keeping all three parts, such as `admits_refuses_zombie_when_destination_is_mining_dimension`.
 - The GameTest helper's assertions are the assertion library inside a GameTest.
-- The gate is `./gradlew build` followed by the repo's GameTest server run, unless the repo's `CLAUDE.md` or `AGENTS.md` names others. The client and server dev runs are not part of the gate.
+- The gate is the data run with a check that `git status --porcelain` prints nothing, then `./gradlew build`, then the repo's GameTest server run, unless the repo's `CLAUDE.md` or `AGENTS.md` names others. The client and server dev runs are not part of the gate.
 
 ## Canonical shape
 
