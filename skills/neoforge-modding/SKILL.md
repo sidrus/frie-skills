@@ -79,11 +79,11 @@ The logger is SLF4J from `LogUtils.getLogger()`. A mod is not a deployed service
 
 ## Performance
 
-Rejected on sight, alongside the shared list: unbounded work in a per-tick path, a block or entity scan repeated every tick, and chunk loading from a tick path. Per-tick paths include `tick`, `animateTick`, `entityInside`, and any frequently fired event.
+A mod adds these to the shared list of shapes rejected without measurement: unbounded work in a per-tick path, a block or entity scan repeated every tick, and chunk loading from a tick path. Per-tick paths include `tick`, `animateTick`, `entityInside`, and any frequently fired event.
 
 ## Testing
 
-Two tiers, and the gate runs both.
+Tests come in two tiers, and the gate runs both.
 
 - **Unit tests** run on JUnit through ModDevGradle's `unitTest` support and `net.neoforged:testframework`. Registries and the mod load, but no level exists, so a unit test never touches a real world. World reads and writes go through a map-backed fake that implements the narrow vanilla interfaces, kept in the test fixtures.
 - **GameTests** cover behavior that needs a real world: entities, block updates, structure placement, and events end to end. They live in a `gameTest` source set that the dev runs bind to the mod and the jar never contains, in the same packages as the code they test so they can reach package-private members. The version reference gives the registration API.

@@ -42,7 +42,7 @@ Javadoc goes on public types and members in the module's `api` packages, which a
 
 ## Logging
 
-SLF4J, with parameterized `{}` messages and the exception as the final argument. One `private static final Logger` per class, unless a framework skill names a different source. Never `System.out` or `printStackTrace`.
+Logging goes through SLF4J, with parameterized `{}` messages and the exception as the final argument. One `private static final Logger` per class, unless a framework skill names a different source. Never `System.out` or `printStackTrace`.
 
 ## Resources
 
@@ -54,7 +54,7 @@ The ruled-out mechanisms are `@SuppressWarnings`, Error Prone `-Xep:<Check>:OFF`
 
 ## Tests
 
-- JUnit 5 with AssertJ. Assert with `assertThat(actual).isEqualTo(expected)` and its relatives, never JUnit's `assertTrue` or `assertEquals`.
+- Tests run on JUnit 5 with AssertJ. Assert with `assertThat(actual).isEqualTo(expected)` and its relatives, never JUnit's `assertTrue` or `assertEquals`.
 - Run the red with `./gradlew test --tests '<Class>.<method>'`.
 - Names are `method_expectedBehavior_condition`, such as `ship_rejectsOrder_whenAlreadyShipped`.
 - Endpoint authorization is one `@ParameterizedTest`.
@@ -76,7 +76,7 @@ package com.example.orders;
 import org.jspecify.annotations.NullMarked;
 ```
 
-A domain record: a nullable component marked, the collection copied immutable:
+A domain record with its nullable component marked and its collection copied immutable:
 
 ```java
 record Order(OrderId id, OrderStatus status, List<OrderLine> lines, @Nullable Address shippingAddress) {

@@ -4,8 +4,8 @@
 
 ## Nullability
 
-- `is null` and `is not null`, never `== null`. No first-party analyzer covers this. Roslynator RCS1248 does, and it correctly leaves expression trees alone, so in a repo carrying that package with `dotnet_diagnostic.RCS1248.severity = warning` this is **(tooling)**. Everywhere else it is on you.
-  - Exception: expression-tree lambdas require `== null`, because `is null` is CS8122 there **(tooling)**. A collection expression `[]` is likewise CS9175 in an expression tree, so use `Array.Empty<T>()`. Don't comment either exception. In practice this only comes up with a LINQ provider, so EF `HasConversion`, `ValueComparer`, and LINQ-to-entities predicates. It never arises in Dapper, where the predicate is SQL.
+- `is null` and `is not null`, never `== null`. No first-party analyzer covers this. Roslynator RCS1248 does, and it correctly leaves expression trees alone, so in a repo carrying that package with `dotnet_diagnostic.RCS1248.severity = warning` this is **(tooling)**. Everywhere else you apply it by hand.
+  - Exception: expression-tree lambdas require `== null`, because `is null` is CS8122 there **(tooling)**. A collection expression `[]` is likewise CS9175 in an expression tree, so use `Array.Empty<T>()`. Don't comment either exception. In practice this comes up only under a LINQ provider, in EF `HasConversion`, `ValueComparer`, and LINQ-to-entities predicates. It never arises in Dapper, where the predicate is SQL.
 - Never the null-forgiving `!`. Use `?.` with a `?? fallback`, or a guard that fails loudly.
 
 ## Values and collections
@@ -34,7 +34,7 @@ XML docs go on the API surface, even when the rest of the file has none. Public 
 
 ## Logging
 
-Every log call goes through `[LoggerMessage]` source generation: `public static partial void X(this ILogger logger, ...)` extension methods in one `*Log.cs` static partial class per feature.
+Every log call goes through `[LoggerMessage]` source generation, as `public static partial void X(this ILogger logger, ...)` extension methods in one `*Log.cs` static partial class per feature.
 
 This is CA1848 **(tooling)** where the repo sets `dotnet_diagnostic.CA1848.severity = warning`. CA rules run during build with no extra property or package, so a direct `logger.LogInformation(...)` call fails the build rather than waiting for review.
 
@@ -51,11 +51,11 @@ Serilog is the logging framework. It is registered as the `ILogger` provider, so
 
 ## Control flow
 
-Braces on every body are IDE0011 via `csharp_prefer_braces`, but an `IDE*` rule only fires during build when the project sets `EnforceCodeStyleInBuild`, so in a repo without that property it is an IDE-only hint and still on you to get right.
+Braces on every body are IDE0011 via `csharp_prefer_braces`, but an `IDE*` rule only fires during build when the project sets `EnforceCodeStyleInBuild`, so in a repo without that property it is an IDE-only hint and you apply it by hand.
 
 ## Await
 
-Never dereference an awaited call in place. `(await GetAsync()).Name` and `(await GetAsync()).Should().Be(x)` both get an `await` on its own line first, landing in a named local that the next line reads. The parenthesized form buries what was awaited behind punctuation, and the local is what makes the line say which value is being asserted on.
+Never dereference an awaited call in place. `(await GetAsync()).Name` and `(await GetAsync()).Should().Be(x)` both get an `await` on its own line first, landing in a named local that the next line reads. The parenthesized form hides what was awaited inside the parentheses, and the local is what makes the line say which value is being asserted on.
 
 ```csharp
 var saved = await File.ReadAllBytesAsync(path, cancellationToken);
@@ -94,7 +94,7 @@ internal static partial class OrderLog
 }
 ```
 
-A domain record: non-null collections, initialized to `[]`, hoisted constants:
+A domain record with non-null collections initialized to `[]` and a hoisted constant array:
 
 ```csharp
 internal sealed record Order(long Id, string Number, IReadOnlyList<OrderLine> Lines)
@@ -109,7 +109,7 @@ internal sealed record Order(long Id, string Number, IReadOnlyList<OrderLine> Li
 }
 ```
 
-Nullability: a guard or a coalesce, never `!`:
+Absence handled with a guard or a coalesce, never `!`:
 
 ```csharp
 if (order.ShippingAddress is null)

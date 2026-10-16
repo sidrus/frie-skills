@@ -54,7 +54,7 @@ The test-support module stays agnostic of any single consumer. When several proj
 
 ## Integration tests
 
-Testcontainers for managed dependencies such as a database or cache. Mock only unmanaged externals, meaning an identity provider or a third-party API. Integration tests live in a separate test project or source set, need Docker, and are not run casually.
+Integration tests use Testcontainers for managed dependencies such as a database or cache. Mock only unmanaged externals, meaning an identity provider or a third-party API. Integration tests live in a separate test project or source set, need Docker, and are not run casually.
 
 ## Naming
 
