@@ -14,9 +14,9 @@ Run the red narrowly, with one filtered run per cycle using the language referen
 
 Tests are classical, not mockist. The unit under test is a behavior, not a class.
 
-- Exercise real collaborators inside the boundary. A test that pulls in several types because they collaborate to produce one behavior is correct, not a violation.
+- Exercise real collaborators inside the subsystem under test. A test that pulls in several types because they collaborate to produce one behavior is correct, not a violation.
 - Assert on the resulting state, not on the interactions that produced it. Interaction verification couples a test to how the code works, so a refactor that preserves behavior breaks the test.
-- A test double appears only where the boundary is real: out of process, nondeterministic, too slow, or unavailable in the test runtime. Everything in process gets the real type or a state-based fake.
+- A test double appears only where the boundary is real: another subsystem's contract, or a dependency that is out of process, nondeterministic, too slow, or unavailable in the test runtime. Everything else in process gets the real type or a state-based fake.
 - Design pressure comes from an assertion being awkward to write, not from a mock being awkward to set up.
 
 ## What not to test

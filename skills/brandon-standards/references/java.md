@@ -40,6 +40,8 @@ Spotless with palantir-java-format owns all layout **(tooling)**. Run `./gradlew
 
 Package-private is the default visibility. It does the work `internal` does in C#, so a feature package keeps its types package-private and makes public only what another package consumes. Packages are named per the code layout outcomes in `engineering-patterns`.
 
+A subsystem's contract is its `api` package. Package-private cannot reach subpackages, so a subsystem's internals may be `public`, and nothing outside the subsystem imports anything but its `api` package.
+
 One top-level type per file. A record or sealed case that exists only to serve one type nests inside it.
 
 ## Naming
@@ -50,7 +52,7 @@ One top-level type per file. A record or sealed case that exists only to serve o
 
 ## Doc comments
 
-Javadoc goes on public types and members in the module's `api` packages, which are its contract with other modules and projects. Code outside `api` packages gets none, even when it is `public` only so that another package can reach it.
+Javadoc goes on public types and members in `api` packages. Code outside them gets none, even when it is `public` only so that another package can reach it.
 
 ## Logging
 

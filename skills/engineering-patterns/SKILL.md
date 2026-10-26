@@ -25,7 +25,7 @@ Rules marked **(tooling)** are enforceable by an analyzer, formatter, or type ch
 
 | Touching | Read |
 |---|---|
-| designing anything: a new feature, a new type, a seam, a state change, a query, a service | `references/architecture.md` first. It decides what earns an interface, where logic lives, and what YAGNI does and does not govern. |
+| designing anything: a new feature, a new type, a seam, a state change, a query, a service | `references/architecture.md` first. It defines subsystems and their contracts, and decides what earns an interface, where logic lives, and what YAGNI does and does not govern. |
 | any test file | `references/testing.md` |
 
 Read the reference **before** the first edit, not as a check afterward. Skip it only for a change that touches no code, such as a docs or config edit. The rules below apply either way.
@@ -61,7 +61,7 @@ Anything callable is named with a verb: methods, functions, private helpers, tes
 
 Three exceptions:
 
-- Doc comments on the API surface: XML docs in C#, docstrings in Python, Javadoc in Java. Each language reference defines what counts as the API surface there. Where both an interface and an implementing class exist, document the interface. Never downgrade an existing doc comment to a plain comment. Parameter, return, and exception tags appear only when they add something the signature doesn't already say.
+- Doc comments on a subsystem's contract, as `references/architecture.md` defines it: XML docs in C#, docstrings in Python, Javadoc in Java. Each language reference says how its contract is marked. Where both an interface and an implementing class exist, document the interface. Never downgrade an existing doc comment to a plain comment. Parameter, return, and exception tags appear only when they add something the signature doesn't already say.
 - A non-obvious test double or support type gets a short doc comment saying why the type exists.
 - The reason on an approved suppression, per Suppressions below.
 
@@ -80,7 +80,7 @@ These apply to every decision regardless of layer. Structure, state, performance
 - Surface simplifications unprompted during design work.
 - When a decision changes, re-derive everything downstream of it. Treat every remaining element as unjustified until it re-earns its place, rather than patching around a superseded decision.
 - Classify errors at the call site, where the type and the stage are both known. Dispatch on exception type or structured fields, never on message text.
-- Push integrity and cleanup into the database (foreign key cascades, constraints) rather than app-ordered deletes or application-side locking.
+- Push integrity and cleanup into the database (foreign key cascades, constraints) rather than app-ordered deletes or application-side locking. A constraint stays within one subsystem's storage.
 
 ## Testing, in brief
 
