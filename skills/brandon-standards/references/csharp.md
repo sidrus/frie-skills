@@ -30,7 +30,7 @@
 
 ## Doc comments
 
-XML docs go on the API surface, even when the rest of the file has none. Public and internal members are equivalent for this, since an internal-by-design assembly still has a cross-layer contract.
+XML docs go on a subsystem's contract whatever its visibility, because a subsystem that is a folder has an `internal` contract. Nothing else gets them.
 
 ## Logging
 

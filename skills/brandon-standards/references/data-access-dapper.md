@@ -6,7 +6,7 @@ Applies when the repo reads and writes through Dapper or other hand-written SQL.
 
 The repository is the data-access layer. It is the only type that touches data entities and the only place SQL lives.
 
-- It projects from `*Entity` on the way out and constructs one on the way in, so no `Data.Entities.*` type ever appears in its interface signature.
+- It projects from `*Entity` on the way out and constructs one on the way in, so no `*Entity` type ever appears in its interface signature.
 - SQL is hoisted to `private const string` raw string literals on the repository. A service never holds a query string.
 - Dapper's extension methods take no token directly, so the token goes through `CommandDefinition`.
 

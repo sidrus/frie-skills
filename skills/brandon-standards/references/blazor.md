@@ -18,18 +18,22 @@ Extract repeated markup into a component. If the same structure appears in two o
 
 ## Project layout
 
-The code layout outcomes in the `engineering-patterns` architecture reference apply. A type that only a shared component uses goes beside that component. Feature-first, mirroring the server's `Features/<Feature>/` convention, is one layout that meets those outcomes:
+The code layout outcomes in the `engineering-patterns` architecture reference apply, so the project root holds one folder per subsystem, mirroring the server's:
 
 ```
-Features/<Feature>/     page + feature-only components + view records + feature projections and parsers
-Components/             app root and the component toolkit: the cancellable base, operation state, dialog options
-Components/Shared/      components two or more features render, each with its own projections and options beside it
-Components/Layout/      shell: layout, sidebar, user menu, reconnect modal
+<Feature>/              page + feature-only components + view records + feature projections and parsers
+Controls/               the app's standard controls, such as buttons, labels, data grids, and dialogs, each with its own projections and options beside it
+Operations/             the cancellable component base and operation state for components that call a backend
+Layout/                 app root and shell: App, Routes, layout, sidebar, user menu, reconnect modal
 Authorization/          current user and policy handlers
-<Backend>Api/           API clients, their options, and their request and result types
+<Backend>Api/           API clients and their options
 Browser/                IJSRuntime services
-_Imports.razor          at the project root, so it covers Features/ as well as Components/
+_Imports.razor          at the project root, so it covers every folder
 ```
+
+A backend in the same solution supplies its request and response types through its contract. `<Backend>Api/` defines its own only for a backend outside the solution.
+
+A control wraps a library component with the app's defaults and behavior. A page customizes a control's behavior or layout by composition, through its parameters and `RenderFragment` slots, and never by inheriting from it.
 
 ## Render mode
 

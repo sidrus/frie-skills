@@ -2,11 +2,73 @@
 
 This file describes general practice, not any one repo.
 
-`SKILL.md` holds the design rules that apply everywhere. This file holds structure, layout, state, performance, and observability. Each language reference in `brandon-standards` holds that language's mechanical layering, such as which types may appear in which signatures.
+`SKILL.md` holds the design rules that apply everywhere. This file holds the subsystem model and the structure, state, performance, and observability rules that follow from it. Each language reference in `brandon-standards` holds that language's mechanical layering, such as which types may appear in which signatures.
+
+## Subsystems
+
+An application is a tree of subsystems. Every structural rule in this file applies these terms:
+
+| Term | Meaning |
+|---|---|
+| Subsystem | Code with one responsibility that owns its state, its storage, and the types that model its concepts. It is named for that responsibility, such as `Orders` or `Pricing`. |
+| Contract | What a subsystem lets other code use: the operations they call, the records those operations take and return, the events it publishes, and its registration. |
+| Internals | Everything in a subsystem that is not its contract. |
+| Composition root | The host's startup code, which chooses the subsystems a process runs. |
+
+The rules:
+
+- One subsystem reaches another only through its contract. Internals take the narrowest visibility the language offers at that level. Where the language cannot hide them, such as between folders in one assembly, no code outside the subsystem references anything but its contract.
+- A subsystem's storage, meaning its tables, schema, files, or cache keys, is internal. No other subsystem reads or writes it, including through a query or a view, so data another subsystem needs comes through the contract.
+- Every type has exactly one owning subsystem. A type that another subsystem uses joins its owner's contract, and the consumer references it there. A persistence type never joins a contract. A project or folder that no subsystem owns, such as `Common`, `Shared`, or `Utils`, does not exist.
+- Dependencies between subsystems point at contracts and form no cycle. A cycle means one responsibility is split across two subsystems, so it moves into one of them or into a new subsystem of its own.
+- Subsystems nest, from a deployed service down to a folder, and these rules hold at every level. A folder is a nested subsystem only when it has its own responsibility and contract. Otherwise it is part of its parent's internals.
+- Only the composition root composes. A subsystem's registration wires its internals, with one entry point per startup phase the host framework has, and the root calls those entry points. No type constructs its own dependencies or pulls them from a container.
+- A subsystem is tested in isolation. Its tests fake the contracts it depends on and use its real internals, per `testing.md`.
+
+### Canonical shape
+
+Match this shape rather than re-deriving it from the rules. `Inventory` reserves stock when `Orders` places an order. Names without a file extension stand for one type each, in the language's own file and visibility conventions.
+
+```
+Orders/                         subsystem
+  OrderLookup                   contract: the operation other subsystems call
+  OrderSummary                  contract: the record OrderLookup returns
+  OrderPlaced                   contract: the event Orders publishes
+  OrdersRegistration            contract: registration
+  Order                         internal domain record, used by both features below
+  OrderRepository               internal data access over the Orders schema
+  OrderEntity                   internal persistence type
+  Placement/
+    PlaceOrderEndpoint
+    OrderPlacementService
+  Lookup/
+    OrderLookupService          implements OrderLookup
+Inventory/                      subsystem, depends on the Orders contract only
+  StockLevels                   contract
+  InventoryRegistration         contract: registration
+  Reservation/
+    OrderPlacedHandler          consumes OrderPlaced
+    ReservationService          calls OrderLookup
+    StockRepository             internal data access over the Inventory schema
+Host/
+  Startup                       composition root: calls OrdersRegistration and InventoryRegistration
+tests/
+  TestSupport/
+    FakeOrderLookup             state-based fake of the Orders contract
+  Inventory/
+    ReservationServiceTests     real Reservation internals with FakeOrderLookup
+```
+
+## Code layout
+
+The folder tree is the subsystem tree, so reading it alone shows every subsystem the application has and what each one is responsible for.
+
+- **Every folder names what it is for**, either a subsystem (`Orders/`, `Authorization/`) or a feature inside one (`Placement/`). It is never named for a kind of type (`Models/`, `Extensions/`, `Helpers/`) or with a name that fits anything (`Infrastructure/`, `Common/`, `Utils/`), because those hide what the code does.
+- **An internal type lives beside its consumer.** When a second consumer in the same subsystem appears, the type moves outward only as far as the nearest folder both consumers share. A consumer in another subsystem puts the type in its owner's contract instead.
 
 ## Layer responsibilities
 
-Three layers, each with one job:
+Inside a subsystem, three layers each have one job:
 
 | Layer | Responsibility | Forbidden |
 |---|---|---|
@@ -26,11 +88,13 @@ A service returns a `Result`. The entry point translates that into its response.
 
 A `bool` or a bare `null` return cannot carry why something failed, which forces the entry point to know that false means "already shipped" here and "out of stock" there. That is domain knowledge in the marshaling layer, so the entry point ends up owning a rule it is not allowed to own.
 
+A lookup whose only failure is absence returns the language's nullable type instead, because absence is the one reason it can carry.
+
 ## What earns a construct
 
 | Construct | Earned by |
 |---|---|
-| Interface | Substitution. The practical test is "will I write a fake for this?" An external dependency always qualifies. |
+| Interface | Substitution. The practical test is "will I write a fake for this?" An external dependency and a contract operation always qualify, so an interface per class never does. |
 | Record | Pure data. |
 | Enum | Two or more members. A single member carries no information, so a `Result` whose error type has one case says only that the call failed, which an exception already says. |
 | Static pure function | Pure methods. Purity beats injection, because a total function never needs a seam. |
@@ -51,19 +115,13 @@ It outranks the convenience of a stable wire shape. If removing the duplication 
 
 Extraction must never read worse than the duplication did. When it does, the parameter is wrong rather than the extraction. A boolean argument or a required `null` argument at a call site is an architectural signal that the method is doing two things or the type is wrong.
 
+DRY applies to logic and concepts, not to matching shapes. Two subsystems that model different concepts with records of similar members are not duplicates, because merging them would give one type two owners.
+
 ## YAGNI
 
-YAGNI, the `SKILL.md` rule against code without a current requirement, does not compete with anything above it. Every structural rule here fires on something that exists right now: a seam a fake needs, a duplicate already in the file, an arm with a real dependency. YAGNI only ever speaks to what does not exist yet, so the two never arbitrate the same decision.
+YAGNI, the `SKILL.md` rule against code without a current requirement, does not compete with anything above it. Every structural rule here fires on something that exists right now: a seam a fake needs, a duplicate already in the file, an arm with a real dependency, a type another subsystem already uses. YAGNI only ever speaks to what does not exist yet, so the two never arbitrate the same decision.
 
-## Code layout
-
-The folder tree describes the application. Reading it alone should give a general sense of every feature, shared component, and system the app has.
-
-- **Similar code lives together.** Code that serves one feature, component, or system sits in one folder, so a change to it touches one place.
-- **Every folder names what it is for.** A folder is named for a feature (`Orders/`), a component, or a system (`Authorization/`, `SalesApi/`). It is never named for a kind of type (`Models/`, `Extensions/`, `Helpers/`) or with a name that fits anything (`Infrastructure/`, `Common/`, `Utils/`), because those hide what the code does.
-- **A type lives beside its consumer.** A type that one feature uses goes in that feature. A type moves outward only when a second consumer appears, and then only as far as the nearest folder both consumers share.
-
-Use the language's narrowest visibility that still lets each consumer reach a type, so the layout and the access rules say the same thing.
+A new subsystem starts as a folder. It becomes its own project or deployed service only when a current requirement, such as a second host or independent deployment, needs that boundary.
 
 ## State and immutability
 

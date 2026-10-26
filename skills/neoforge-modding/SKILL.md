@@ -32,7 +32,7 @@ Packages are named for features (`portal`, `dimension`), never for kinds of game
 
 ## Registration
 
-- Every registry object is registered through a `DeferredRegister`. Each feature package owns the registers for its own objects and exposes one `register(IEventBus)` method, which the `@Mod` class calls.
+- Every registry object is registered through a `DeferredRegister`. Each feature package owns the registers for its own objects and exposes one `register(IEventBus)` method, which the `@Mod` class calls as the composition root.
 - A registry object is constructed only inside its supplier, and read through its holder after registration completes.
 - Datapack registry content such as dimensions, biomes, and worldgen features is data, not a `DeferredRegister` entry.
 - A lookup derived from registered objects that never changes afterward is built once during common setup through `enqueueWork`.

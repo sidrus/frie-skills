@@ -7,27 +7,22 @@ The rules here hold whatever the data-access library. The data-access layer itse
 
 For the query-level mechanics behind the performance rules in `engineering-patterns`, read `dotnet-skills:database-performance` and `dotnet-skills:efcore-patterns`. The performance rules decide *which* fix to apply and in what order, and those skills cover how to write it.
 
-## Which project owns a type
+## Which subsystem owns a type
 
-A type belongs to the project that **consumes** it, not the one it feels thematically related to.
+Projects and folders follow the subsystem model in the `engineering-patterns` architecture reference, and `Program.cs` is the composition root.
 
-| Project | What goes here |
-|---|---|
-| Core | Types shared by two or more projects: API request and response types, domain events, enums, shared utilities. No dependency on any data-access library. |
-| Data | Data-access plumbing shared by several projects: the connection factory or `DbContext`, data entities, and migration artifacts. Nothing else. Plumbing used by one project lives in that project. |
-| Worker, Blazor, and other leaf projects | Project-internal types. If one project uses it, it lives there, even when it models a business concept. |
-
-Don't preemptively promote a type to Core. Move it when a second project actually needs it.
-
-One exception: API request and response types stay in Core even when a single project serves them, because their consumer is the external HTTP caller rather than a project.
+- A subsystem that is its own project makes its contract `public` and everything else `internal`. Inside one project, both are `internal`.
+- Each subsystem owns its data access: its `DbContext` or repositories, its data entities, and the migrations for its schema.
+- Plumbing with no domain knowledge that several subsystems need, such as a connection factory, is its own subsystem named for that one responsibility. It never holds data entities or another subsystem's types.
+- API request and response types belong to the subsystem whose endpoints serve them. They join its contract only when a .NET client in another project consumes them.
 
 ## The three type categories
 
 | Category | Location | Naming | Purpose |
 |---|---|---|---|
-| Data entities | `Data.Entities.*` | `*Entity` suffix | Persistence only, never leaves the data-access layer |
-| Domain records | `<Project>.Features.<Feature>.*` | Plain names | Internal working types passed between layers |
-| API types | `Core.Api.*` | `*Request` and `*Response` | HTTP contracts |
+| Data entities | Beside the owning subsystem's data access | `*Entity` suffix | Persistence only, never leaves the data-access layer |
+| Domain records | The owning subsystem's folder | Plain names | Working types passed between layers, and the records a contract takes and returns |
+| API types | Beside the endpoints that serve them | `*Request` and `*Response` | HTTP contracts |
 
 Under Dapper every table has a data entity. Under EF Core the domain record is usually the mapped type, and a data entity exists only where model configuration cannot bridge the table's shape. Each data-access file says when.
 
@@ -40,7 +35,7 @@ Who holds which *responsibility* is in the `engineering-patterns` architecture r
 | Layer | Accepts | Returns |
 |---|---|---|
 | Data access | Domain records, primitives | Domain records, primitives |
-| Service | Domain records, primitives | A `Result` over domain records or primitives |
+| Service | Domain records, primitives | A `Result` over domain records or primitives, or a nullable record from a lookup |
 | Endpoint | `*Request` types | `*Response` types |
 
 The data-access layer is the repository under Dapper and the `DbContext` under EF Core. In both, a data entity stays inside it and never appears in a service or endpoint signature.
@@ -108,7 +103,7 @@ internal static class OrderEndpoints
 {
     public static async Task<Results<Ok<OrderDetailResponse>, NotFound>> GetOrderAsync(
         long id,
-        IOrderService orders,
+        OrderService orders,
         CancellationToken cancellationToken)
     {
         var order = await orders.FindAsync(id, cancellationToken);
@@ -121,4 +116,62 @@ internal static class OrderEndpoints
         return TypedResults.Ok(order.ToOrderDetailResponse());
     }
 }
+```
+
+When `Orders` is its own project, a contract operation is a `public` interface over `public` records, implemented by an `internal` service:
+
+```csharp
+/// <summary>Reads orders on behalf of other subsystems.</summary>
+public interface IOrderLookup
+{
+    /// <summary>Finds an order's summary, or returns null when no order has the ID.</summary>
+    Task<OrderSummary?> FindAsync(long id, CancellationToken cancellationToken);
+}
+```
+
+A subsystem's registration, one `extension(T)` block per startup phase, wiring `internal` types that the host never sees:
+
+```csharp
+/// <summary>Registers the Orders subsystem with a host.</summary>
+public static class OrdersRegistration
+{
+    extension(IServiceCollection services)
+    {
+        /// <summary>Registers the Orders services.</summary>
+        public IServiceCollection AddOrders()
+        {
+            services.AddScoped<IOrderLookup, OrderLookupService>();
+            services.AddScoped<OrderPlacementService>();
+
+            return services;
+        }
+    }
+
+    extension(IEndpointRouteBuilder endpoints)
+    {
+        /// <summary>Maps the Orders HTTP endpoints.</summary>
+        public IEndpointRouteBuilder MapOrders()
+        {
+            endpoints.MapGet("/orders/{id:long}", OrderEndpoints.GetOrderAsync);
+
+            return endpoints;
+        }
+    }
+}
+```
+
+The host's `Program.cs` is the composition root and calls only registration entry points:
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddOrders()
+    .AddInventory();
+
+var app = builder.Build();
+
+app.MapOrders();
+
+app.Run();
 ```
