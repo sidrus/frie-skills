@@ -17,6 +17,18 @@ description: Prose style for documentation, code comments, XML docs, Javadoc, an
 - Keep paragraphs to three or four concise sentences.
 - Use literal language. No metaphors, idioms, or other figurative speech.
 
+## Voice
+
+Text written on Brandon's behalf, such as docs, PR descriptions, commit messages, comments, and tickets, reads as his own writing.
+
+- Lead with the decision, then give a short reason, as in "Dropped the GUID. UserIndex is already unique per source."
+- Use "we" for the team and the system, and "I" only for Brandon's own preferences.
+- Give numbers and verified facts in place of adjectives.
+- State scope explicitly, including what is left out.
+- In design writing, move from the problem to the principle, then the mechanism, then the benefit.
+
+Finished products such as docs, PR descriptions, and work items are polished, grammatical, and free of typos. PR comments and commit messages can be less formal but still read well.
+
 ## Claims
 
 State as fact only what you verified. Where code is (uncommitted, on a branch, merged, deployed) comes from evidence you checked, and impact stays conditional ("once this ships") until deployment is verified.
