@@ -3,13 +3,19 @@
   "owner": {
     "name": "Brandon Frie"
   },
-  "description": "Brandon Frie's agent skills, as an installable Claude Code plugin.",
+  "description": "Brandon Frie's agent skills and hooks, as installable Claude Code plugins.",
   "plugins": [
     {
       "name": "frie-skills",
       "source": "./",
       "description": "Brandon Frie's engineering patterns, language standards, NeoForge conventions, and prose style.",
       "category": "engineering"
+    },
+    {
+      "name": "secret-files-guard",
+      "source": "./plugins/secret-files-guard",
+      "description": "Denies tool calls that reach a secrets file (.env, *.local.json, credential stores, private keys) by name, symlink, or glob.",
+      "category": "security"
     }
   ]
 }
