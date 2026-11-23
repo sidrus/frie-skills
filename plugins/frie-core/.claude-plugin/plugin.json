@@ -1,0 +1,17 @@
+{
+  "name": "frie-core",
+  "version": "1.0.0",
+  "description": "Brandon Frie's language-neutral engineering patterns and prose style, and a hook that flags British spellings.",
+  "author": {
+    "name": "Brandon Frie"
+  },
+  "repository": "https://github.com/sidrus/frie-skills",
+  "license": "MIT",
+  "engines": {
+    "claude-code": ">=2.1.330"
+  },
+  "skills": [
+    "./skills/engineering-patterns",
+    "./skills/writing-style-guide"
+  ]
+}

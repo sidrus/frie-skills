@@ -1,0 +1,15 @@
+{
+  "name": "frie-java",
+  "version": "1.0.0",
+  "description": "Brandon Frie's Java standards.",
+  "author": {
+    "name": "Brandon Frie"
+  },
+  "repository": "https://github.com/sidrus/frie-skills",
+  "license": "MIT",
+  "engines": {
+    "claude-code": ">=2.1.330"
+  },
+  "dependencies": ["frie-core"],
+  "skills": ["./skills/standards"]
+}

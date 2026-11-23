@@ -6,15 +6,39 @@
   "description": "Brandon Frie's agent skills and hooks, as installable Claude Code plugins.",
   "plugins": [
     {
-      "name": "frie-skills",
-      "source": "./plugins/frie-skills",
-      "description": "Brandon Frie's engineering patterns, language standards, NeoForge conventions, and prose style.",
+      "name": "frie-core",
+      "source": "./plugins/frie-core",
+      "description": "Brandon Frie's language-neutral engineering patterns and prose style, and a hook that flags British spellings.",
+      "category": "engineering"
+    },
+    {
+      "name": "frie-dotnet",
+      "source": "./plugins/frie-dotnet",
+      "description": "Brandon Frie's C#, .NET, and Blazor standards, and a hook that denies a C# or Razor edit until its references are read.",
+      "category": "engineering"
+    },
+    {
+      "name": "frie-python",
+      "source": "./plugins/frie-python",
+      "description": "Brandon Frie's Python standards, and a hook that denies a Python edit until its references are read.",
+      "category": "engineering"
+    },
+    {
+      "name": "frie-java",
+      "source": "./plugins/frie-java",
+      "description": "Brandon Frie's Java standards.",
+      "category": "engineering"
+    },
+    {
+      "name": "frie-neoforge",
+      "source": "./plugins/frie-neoforge",
+      "description": "Brandon Frie's NeoForge Minecraft mod conventions, layered on his Java standards.",
       "category": "engineering"
     },
     {
       "name": "secret-files-guard",
       "source": "./plugins/secret-files-guard",
-      "description": "Denies tool calls that reach a secrets file (.env, *.local.json, credential stores, private keys) by name, symlink, or glob.",
+      "description": "Denies tool calls that reach a secrets file (.env, *.local.json, credential stores, private keys) through a path or a glob.",
       "category": "security"
     }
   ]

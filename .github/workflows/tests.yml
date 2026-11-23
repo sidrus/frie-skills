@@ -3,17 +3,25 @@ on:
   pull_request:
   push:
     branches: [main]
+permissions:
+  contents: read
 jobs:
   hooks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22
       - run: npm install -g @anthropic-ai/claude-code@2.1.330
       - run: claude plugin validate .
-      - run: claude plugin validate plugins/frie-skills
+      - run: claude plugin validate plugins/frie-core
+      - run: claude plugin validate plugins/frie-dotnet
+      - run: claude plugin validate plugins/frie-python
+      - run: claude plugin validate plugins/frie-java
+      - run: claude plugin validate plugins/frie-neoforge
       - run: claude plugin validate plugins/secret-files-guard
-      - run: claude plugin test plugins/frie-skills
+      - run: claude plugin test plugins/frie-core
+      - run: claude plugin test plugins/frie-dotnet
+      - run: claude plugin test plugins/frie-python
       - run: claude plugin test plugins/secret-files-guard

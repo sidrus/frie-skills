@@ -7,13 +7,16 @@ const SECRET_NAMES = new RegExp(
   [
     String.raw`local\.json`,
     String.raw`appsettings[^\s"']*[*?]`,
-    String.raw`(?<!process)\.env(?!\.(ctmpl|example)\b)(?![\w-])`,
+    String.raw`(?<![\w.-])\.env(?!\.(ctmpl|example)\b)(?![\w-])`,
+    String.raw`(?<=[\w-])(?<!process|import\.meta)\.env(?![\w.-])`,
     String.raw`(?<![\w.-])(\.envrc|\.npmrc|\.pypirc|\.netrc|_netrc|\.git-credentials|\.pgpass|\.my\.cnf|\.vault-token)(?![\w.-])`,
     String.raw`(?<![\w-])id_(rsa|dsa|ecdsa|ed25519)(?![\w.-]*\.pub(?![\w.-]))`,
-    String.raw`\.(pem|p12|pfx|jks|keystore)(?![\w.-])`,
+    String.raw`\.(pem|p12|pfx|jks)(?![\w.-])`,
+    String.raw`(?<!java\.security)\.keystore(?![\w.-])`,
     String.raw`terraform\.tfstate`,
     String.raw`secret[^/\\\s"']*\.(json|ya?ml|toml|properties|ini)(?![\w.-])`,
     String.raw`microsoft[/\\]usersecrets`,
+    String.raw`user-secrets\b[^;&|\n]*\slist\b`,
     String.raw`\.aws[/\\]credentials`,
     String.raw`\.kube[/\\]config(?![\w.-])`,
     String.raw`\.docker[/\\]config\.json`,
@@ -29,6 +32,8 @@ const QUOTING = /["'\\]/g
 const TOKEN_SEPARATOR = /[\s;|&<>()=,`]+/
 const GLOB_CHARACTER = /[*?[]/
 const GLOB_LITERAL = /[.+^$(){}|]/g
+const BRACE_GROUP = /\{([^{}]*,[^{}]*)\}/
+const MAX_EXPANSIONS = 256
 const DOT_FILES = ['.env', '.env.local', '.envrc', '.npmrc', '.pypirc', '.netrc', '.git-credentials', '.pgpass', '.my.cnf', '.vault-token']
 const KEY_FILES = ['id_rsa', 'id_dsa', 'id_ecdsa', 'id_ed25519', 'x.pem', 'x.p12', 'x.pfx', 'x.jks', 'x.keystore', 'terraform.tfstate']
 const FILE_TOOLS = new Set(['Read', 'Edit', 'Write', 'NotebookEdit', 'Grep'])
@@ -91,6 +96,23 @@ function isRiskyGlob(token: string): boolean {
   return reachesDotFile || reachesKeyFile
 }
 
+function expandBraces(text: string): string[] {
+  const expanded = [text]
+  for (const variant of expanded) {
+    if (expanded.length >= MAX_EXPANSIONS) {
+      break
+    }
+    const group = BRACE_GROUP.exec(variant)
+    const choices = group?.[1]
+    if (group !== null && choices !== undefined) {
+      const head = variant.slice(0, group.index)
+      const tail = variant.slice(group.index + group[0].length)
+      expanded.push(...choices.split(',').map(choice => head + choice + tail))
+    }
+  }
+  return expanded
+}
+
 function hasRiskyGlob(text: string): boolean {
   return text.split(TOKEN_SEPARATOR).some(isRiskyGlob)
 }
@@ -105,7 +127,7 @@ export function isSecretPath(path: string): boolean {
 
 export function reachesSecret(call: ToolInput): boolean {
   const raw = listTargets(call)
-  const plain = raw.map(target => target.replace(QUOTING, ''))
+  const plain = raw.map(target => target.replace(QUOTING, '')).flatMap(expandBraces)
   return (
     plain.some(hasRiskyGlob) ||
     [...raw, ...plain].some(target => SECRET_NAMES.test(target)) ||
