@@ -19,7 +19,7 @@ Applies when `neo_version` is 21.0 or 21.1, which target Minecraft 1.21 and 1.21
 
 ## GameTests
 
-- A test class carries `@GameTestHolder(MOD_ID)`, which registers it. Each test is a `public static void` method annotated `@GameTest` that takes a `GameTestHelper`.
+- A test class is annotated `@GameTestHolder(MOD_ID)`, which registers it. Each test is a `public static void` method annotated `@GameTest` that takes a `GameTestHelper`.
 - The test name is the lowercased class and method names, so the method name is the snake case name from `SKILL.md`. That is the one place a Java method name is snake case.
-- Each test runs in a structure template, a `.nbt` file under `data/<modid>/structure`. With `@PrefixGameTestTemplate(false)` on the class, `@GameTest(template = "...")` names a template that every class shares, such as one empty platform for tests that build their own setup.
+- Each test runs in a structure template, a `.nbt` file under `data/<modid>/structure`. With `@PrefixGameTestTemplate(false)` on the class, `@GameTest(template = "...")` selects a template that every class shares, such as one empty platform for tests that build their own setup.
 - The `gameTestServer` run sets the `neoforge.enabledGameTestNamespaces` system property to the mod ID.

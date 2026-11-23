@@ -15,9 +15,9 @@ Each rule states an intent, and each language expresses it in its own idiom. Whe
 
 1. The repo's own `CLAUDE.md` or `AGENTS.md` wins for repo-specific facts: schema names, package versions, folder layout, exemption lists, gate commands.
 2. The frie-skills skills win for style, layering, and policy. A framework skill wins over a language reference, which wins over this skill, on the points where they deliberately differ.
-3. Generic installed skills cover what neither of the above does. Each language reference names the ones that apply. Where they conflict with frie-skills, frie-skills wins.
+3. Generic installed skills cover what neither of the above does. Each language reference lists the ones that apply. Where they conflict with frie-skills, frie-skills wins.
 
-Existing code that disagrees with these skills is drift, not precedent. Write to the skills unless the repo's `CLAUDE.md` or `AGENTS.md` overrides them.
+Existing code that disagrees with these skills is drift, not precedent. Write to the skills unless the repo's `CLAUDE.md` or `AGENTS.md` overrides them. Fix drift in every file a change already touches, in the same change, and list those fixes in the report apart from the feature work.
 
 Rules marked **(tooling)** are enforceable by an analyzer, formatter, or type checker, but whether they are enforced is per repo. Check what the repo actually configures. Where a rule is enforced, write it correctly the first time and don't spend review comments on it, because the build catches it. Where it isn't, the rule still holds and you apply it by hand.
 
@@ -34,10 +34,12 @@ Read the reference **before** the first edit, not as a check afterward. Skip it 
 
 Anything callable is named with a verb: methods, functions, private helpers, test helpers, test fixtures, and any named lambda. A noun name belongs to a value, meaning a property, field, or variable. `Code(string code)`, `RedisDatabase()`, and a fixture called `candidates` are all wrong. An accessor whose shape the language dictates, such as a Java record component, keeps that shape.
 
+Name an operation for what it means in the domain, such as `BlockHost` and `UnblockHost`, never for the storage mechanics behind it, such as save or deactivate. This holds from the stored procedure up through every layer over it.
+
 ## Signatures
 
 - Two parameters at most, plus whatever trailing cancellation parameter the language uses.
-- When a signature needs more, fold the extras into a type that already exists. A new record whose only purpose is to carry arguments is a last resort.
+- When a signature needs more, fold the extras into a type that already exists. A new record whose only purpose is to group arguments is a last resort.
 - A value that is constant per call site rather than per call is not a parameter. Hoist each combination to a named constant and pass that.
 - No unused parameters. That includes a cancellation token the library underneath gives no way to pass on, and a parameter kept only because a sibling method takes one.
 - These limits govern signatures you design. Where a framework dictates the shape, such as a route handler, an overridden framework method, an event handler, a generated partial, or a delegate matching a library's signature, they do not apply.
@@ -95,7 +97,7 @@ These apply to every decision regardless of layer. Structure, state, performance
 
 ## Suppressions
 
-Never suppress a warning, including style rules. Redesign so the warning does not fire, at every call site. Each language reference names the suppression mechanisms it rules out. If a warning is a genuine false positive, ask. An approved suppression carries its reason in a justification field where the mechanism has one, and on the suppression line where it does not.
+Never suppress a warning, including style rules. Redesign so the warning does not fire, at every call site. Each language reference lists the suppression mechanisms it rules out. If a warning is a genuine false positive, ask. An approved suppression states its reason in a justification field where the mechanism has one, and on the suppression line where it does not.
 
 Static analysis findings are authoritative, and only an existing suppression opts out of one. Where a finding contradicts a convention in these skills, the finding wins at the line it flags and the convention holds everywhere else.
 
@@ -105,7 +107,7 @@ No empty sections in `.editorconfig` or similar config files.
 
 ## Before claiming done
 
-1. Run the repo's gate command (its `CLAUDE.md` names it).
+1. Run the repo's gate command (its `CLAUDE.md` specifies it).
 2. Scan every touched file for comments you added without being asked.
 3. Confirm no new suppression was introduced.
 4. Report failures with their output. Never describe unverified work as passing.

@@ -7,7 +7,7 @@ description: Prose style for documentation, code comments, XML docs, Javadoc, an
 
 ## Length
 
-- Add text only when it carries something new, and then use as few words as that information needs.
+- Add text only when it says something new, and then use as few words as that information needs.
 - State each point once. Cut restatements and examples that repeat an earlier sentence.
 
 ## Sentences
@@ -16,6 +16,8 @@ description: Prose style for documentation, code comments, XML docs, Javadoc, an
 - Write flowing grammatical sentences in the active voice. Em-dash asides and colon-chained clauses read as AI-speak, so restructure them into full sentences rather than choppy fragments. Term-definition bullets and tables are fine.
 - Keep paragraphs to three or four concise sentences.
 - Use literal language. No metaphors, idioms, or other figurative speech.
+- Never end a sentence on a preposition or particle.
+- Don't use "carries" or "names" as verbs. Pick the specific verb, such as contains, holds, lists, or identifies.
 
 ## Voice
 
@@ -35,7 +37,7 @@ State as fact only what you verified. Where code is (uncommitted, on a branch, m
 
 ## Explanations
 
-Explain with the causal chain: what you saw, what it changes, and what you recommend. Leave out what you tried, weighed, or ruled out. A question to the reader carries that chain and a recommendation, so it can be answered from the one message.
+Explain with the causal chain: what you saw, what it changes, and what you recommend. Leave out what you tried, weighed, or ruled out. A question to the reader includes that chain and a recommendation, so it can be answered from the one message.
 
 ## Documentation
 
@@ -43,6 +45,10 @@ Explain with the causal chain: what you saw, what it changes, and what you recom
 - Write as current state. Removed content is deleted outright, with no "removed" note, no "formerly", and no reference to a superseded plan.
 - Keep one source of truth per topic, so a replaced doc is deleted rather than left beside its successor.
 - Temporary or one-off docs don't get linked from a docs index.
+
+## Pull request descriptions
+
+Use the headings Overview, Code Changes, Database Changes, and Testing Performed, in that order, and omit any that don't apply. The overview is one sentence, and every other section is one-line bullets. Include only what a reviewer can't see in the diff, so no per-object tables or file walkthroughs.
 
 ## Code comments
 

@@ -4,7 +4,7 @@
 
 ## Nullability
 
-- `is null` and `is not null`, never `== null`. No first-party analyzer covers this. Roslynator RCS1248 does, and it correctly leaves expression trees alone, so in a repo carrying that package with `dotnet_diagnostic.RCS1248.severity = warning` this is **(tooling)**. Everywhere else you apply it by hand.
+- `is null` and `is not null`, never `== null`. No first-party analyzer covers this. Roslynator RCS1248 does, and it correctly leaves expression trees alone, so in a repo referencing that package with `dotnet_diagnostic.RCS1248.severity = warning` this is **(tooling)**. Everywhere else you apply it by hand.
   - Exception: expression-tree lambdas require `== null`, because `is null` is CS8122 there **(tooling)**. A collection expression `[]` is likewise CS9175 in an expression tree, so use `Array.Empty<T>()`. Don't comment either exception. In practice this comes up only under a LINQ provider, in EF `HasConversion`, `ValueComparer`, and LINQ-to-entities predicates. It never arises in Dapper, where the predicate is SQL.
 - Never the null-forgiving `!`. Use `?.` with a `?? fallback`, or a guard that fails loudly.
 
@@ -13,6 +13,7 @@
 - `string.Empty`, never `""`. This includes defaults, coalescing, and query comparisons. Under a LINQ provider it also translates correctly, so EF turns `!= string.Empty` into `<> ''`.
 - Domain and API collections are `IReadOnlyList<T>` initialized to `[]`.
 - A hoisted constant array is a `private static readonly T[]` field. Inline constant arrays at repeated call sites are CA1861 **(tooling)**.
+- On an array or list, use the indexer, `Count`, ranges, or the collection's own methods, never `Enumerable` methods such as `FirstOrDefault`, `Last`, `Reverse`, or `Take`. `Select` projections are fine.
 
 ## File and member layout
 
@@ -20,6 +21,8 @@
 - Types that bind to `IOptions` are records.
 - Expression-bodied members put `=>` at the end of the signature line, the conventional trailing placement.
 - Private `static readonly` fields are `_camelCase`.
+- Enum members are separated by a blank line.
+- An object initializer that doesn't fit on one line with its `new` puts its opening brace on its own line and one member per line.
 
 ## Signatures and naming
 
@@ -27,6 +30,8 @@
 - A value hoisted out of a signature is a `private static readonly` field.
 - A member that only returns a value is a property, never a noun-named method.
 - Return the concrete type when it is known, so `MemoryStream` rather than `Stream`.
+- Return a named record, never a tuple, private helpers included.
+- Resolve a name collision by renaming the type, never with a `using` alias.
 
 ## Doc comments
 
@@ -65,7 +70,7 @@ saved.Should().StartWith([0xEF, 0xBB, 0xBF]);
 
 ## Suppressions
 
-The ruled-out mechanisms are `#pragma`, `[SuppressMessage]`, and csproj `<NoWarn>`. An approved `[SuppressMessage]` carries its reason in `Justification`, and an approved `#pragma` carries it on the pragma line.
+The ruled-out mechanisms are `#pragma`, `[SuppressMessage]`, and csproj `<NoWarn>`. An approved `[SuppressMessage]` states its reason in `Justification`, and an approved `#pragma` states it on the pragma line.
 
 ## Tests
 

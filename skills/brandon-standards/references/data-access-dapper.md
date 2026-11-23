@@ -12,7 +12,7 @@ The repository is the data-access layer. It is the only type that touches data e
 
 ## Data entities
 
-Every table read or written gets a `*Entity`. It is shaped by the table, so it carries the column nullability, the raw JSON string, and the identity key, and it stays behind the repository. It never doubles as the domain record, even when the two currently have the same members, because hand-written SQL has no model configuration to absorb a later difference in shape.
+Every table read or written gets a `*Entity`. It is shaped by the table, so it holds the column nullability, the raw JSON string, and the identity key, and it stays behind the repository. It never doubles as the domain record, even when the two currently have the same members, because hand-written SQL has no model configuration to absorb a later difference in shape.
 
 Both directions of the entity boundary live in one `*EntityMappingExtensions.cs`, shaped as in `dotnet-layering.md`.
 

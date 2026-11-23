@@ -1,6 +1,6 @@
 # Testing
 
-Each language reference in `brandon-standards` names that language's test runner, assertion library, Faker library, and test-name casing. This file holds what is true in all of them.
+Each language reference in `brandon-standards` specifies that language's test runner, assertion library, Faker library, and test-name casing. This file holds what is true in all of them.
 
 ## TDD
 
@@ -8,7 +8,11 @@ Default to TDD for anything with real behavior. Agree the seams first, then go r
 
 The red run is watched. Execute the failing test and show its failure output before writing any implementation, on every cycle. Arranging test doubles for several slices up front, with no intervening red run, reads as skipping TDD.
 
+Start with the test even when the types it uses don't exist, because the compile failure is the first red. Add each missing type as a stub whose members throw, and rerun until the failures are behavior failures. Then implement one member at a time, rerunning after each. No code exists until a failing test needs it, and integration tests come last.
+
 Run the red narrowly, with one filtered run per cycle using the language reference's filter command. The full gate runs once, at the end.
+
+When covering existing code, take the expected behavior from what the feature is for, never from reading the implementation. A failure is a possible bug to report, not a test to bend toward the code.
 
 ## Detroit school
 
@@ -48,7 +52,7 @@ Tests are classical, not mockist. The unit under test is a behavior, not a class
 
 ## Where test code lives
 
-Tests are production code. Shared fakes, builders, and helpers live in one shared test-support module referenced by every test suite, never duplicated across unit and integration suites. The language reference names the module's form.
+Tests are production code. Shared fakes, builders, and helpers live in one shared test-support module referenced by every test suite, never duplicated across unit and integration suites. The language reference specifies the module's form.
 
 The test-support module stays agnostic of any single consumer. When several projects reference it, a builder for one project's internal domain types stays local to that project's tests rather than being promoted, because promoting it would drag that project's reference into every test suite.
 
