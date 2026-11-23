@@ -1,0 +1,10 @@
+{
+  "name": "secret-files-guard",
+  "version": "1.1.0",
+  "description": "Denies tool calls that reach a secrets file (.env, *.local.json, credential stores, private keys) by name, symlink, or glob.",
+  "author": {
+    "name": "Brandon Frie"
+  },
+  "repository": "https://github.com/sidrus/frie-skills",
+  "license": "MIT"
+}
