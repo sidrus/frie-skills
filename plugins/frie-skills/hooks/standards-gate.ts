@@ -1,6 +1,5 @@
-import type { On } from 'claude-code'
+import type { On, SessionMessage } from 'claude-code'
 
-const MAIN_AGENT = 'main'
 const STANDARDS = 'brandon-standards/references'
 const PYTHON = `${STANDARDS}/python.md`
 const CSHARP = `${STANDARDS}/csharp.md`
@@ -29,40 +28,29 @@ function writeDenial(missing: string[], file: string): string {
   return `BLOCKED by the standards gate. Brandon requires the reference for what you touch to be read BEFORE the first edit, not as a check afterward. Not read in full yet in this context window: ${paths}. Read each one with the Read tool and no offset or limit, then repeat this edit. If ${name} crosses a repository, service, endpoint, or mapping boundary, read dotnet-layering.md as well. Reading them is the entire point, so do not route around this by writing the file through Bash.`
 }
 
+function listFullReads(transcript: SessionMessage[]): string[] {
+  return transcript
+    .flatMap(message => message.toolUses)
+    .filter(use => use.tool === 'Read' && use.isError === undefined && use.input.offset === undefined && use.input.limit === undefined)
+    .map(use => use.input.file_path)
+    .filter(path => typeof path === 'string')
+}
+
 export function registerStandardsGate(on: On) {
-  const readsByAgent = new Map<string, Set<string>>()
-
-  on('tool.call', { tool: 'Read' }, async ($, e, next) => {
-    const answer = await next(e)
-    const isFullRead = e.offset === undefined && e.limit === undefined
-    if (isFullRead && answer.deny === undefined && answer.isError !== true) {
-      const agent = e.agentId ?? MAIN_AGENT
-      readsByAgent.set(agent, (readsByAgent.get(agent) ?? new Set()).add(e.file_path))
+  on('tool.call', { tool: ['Edit', 'Write'] }, async ($, e, next) => {
+    const required = listRequiredReferences(e.file_path)
+    if (required.length === 0) {
+      return next(e)
     }
-    return answer
-  })
-
-  on('tool.call', { tool: ['Edit', 'Write'] }, ($, e, next) => {
-    const reads = [...(readsByAgent.get(e.agentId ?? MAIN_AGENT) ?? [])]
-    const missing = listRequiredReferences(e.file_path).filter(reference => !reads.some(path => path.endsWith(`/${reference}`)))
+    const transcript = await $.session.messages({ agentId: e.agentId })
+    if (!Array.isArray(transcript)) {
+      return next(e)
+    }
+    const reads = listFullReads(transcript)
+    const missing = required.filter(reference => !reads.some(path => path.endsWith(`/${reference}`)))
     if (missing.length === 0) {
       return next(e)
     }
     return { deny: writeDenial(missing.map(reference => `${$.plugin.root}/skills/${reference}`), e.file_path) }
   }).catch(($, e, next) => next(e))
-
-  on('session.compact', async ($, e, next) => {
-    const answer = await next(e)
-    if (answer.skip === undefined) {
-      readsByAgent.delete(e.agentId ?? MAIN_AGENT)
-    }
-    return answer
-  })
-
-  on('session.end', ($, e, next) => {
-    if (e.reason === 'clear') {
-      readsByAgent.clear()
-    }
-    return next(e)
-  })
 }
