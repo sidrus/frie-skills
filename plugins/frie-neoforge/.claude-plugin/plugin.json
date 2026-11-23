@@ -1,0 +1,15 @@
+{
+  "name": "frie-neoforge",
+  "version": "1.0.0",
+  "description": "Brandon Frie's NeoForge Minecraft mod conventions, layered on his Java standards.",
+  "author": {
+    "name": "Brandon Frie"
+  },
+  "repository": "https://github.com/sidrus/frie-skills",
+  "license": "MIT",
+  "engines": {
+    "claude-code": ">=2.1.330"
+  },
+  "dependencies": ["frie-java"],
+  "skills": ["./skills/standards"]
+}
