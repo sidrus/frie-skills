@@ -123,7 +123,7 @@ Regex cannot do this safely. Raw string literals, interpolated strings, and comm
 Use a throwaway console app that references `Microsoft.CodeAnalysis.CSharp`, parse with `LanguageVersion.Preview` so C# 14 `extension(T)` blocks parse cleanly, and collect edits as offset splices keyed off token positions.
 
 - Check `GetDiagnostics()` for errors per file and skip anything that fails to parse rather than rewriting a bad tree.
-- Find chains by walking `InvocationExpressionSyntax` down through `MemberAccessExpressionSyntax`, and only act on chains whose parent is a statement, a return, an arrow body, or a variable initializer. That parent check is what keeps nested chains out.
+- Find chains by walking `InvocationExpressionSyntax` down through `MemberAccessExpressionSyntax`, and only act on chains whose parent is a statement, a return, an arrow body, or a variable initializer. That parent check excludes nested chains.
 - Run it to a fixpoint. A second pass should report zero edits, which shows the rules are consistent rather than undoing each other.
-- Finish with `dotnet format --verify-no-changes`. If it reports work to do, the rewriter has introduced something code cleanup disagrees with.
+- Finish with `dotnet format --verify-no-changes`. If it reports work to do, the rewriter has introduced something that code cleanup rejects.
 - Verify with a full build and the whole test suite. Every edit is whitespace, so any behavior change means a bug in the rewriter.

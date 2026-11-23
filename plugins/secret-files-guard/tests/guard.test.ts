@@ -1,14 +1,14 @@
-import type { FsStat, On } from 'claude-code'
+import type { FsStat, On, ToolCallArgs } from 'claude-code'
 import { describe, expect, test, type Engine } from 'claude-code/testing'
 
-type Call = { tool: string; [field: string]: unknown }
+type Call = ToolCallArgs
 type Outcome = 'allow' | 'deny'
 
 const RAN = 'ran'
 const NO_LINKS = new Map<string, FsStat>()
 
 function arrange(on: On, stats: Map<string, FsStat>) {
-  on('tool.call', () => ({ result: RAN }) as never)
+  on('tool.call', () => ({ result: RAN }))
   on('fs.stat', (_, e) => {
     const stat = stats.get(e.path)
     return stat === undefined ? { deny: 'missing' } : { value: stat }
@@ -16,7 +16,7 @@ function arrange(on: On, stats: Map<string, FsStat>) {
 }
 
 async function decide($: Engine, call: Call): Promise<Outcome> {
-  const answer = await $.tool.call(call as never)
+  const answer = await $.tool.call(call)
   return answer.result === RAN ? 'allow' : 'deny'
 }
 
@@ -53,6 +53,9 @@ const CASES: [string, Call, Outcome][] = [
   ['Bash .en*', bashOf('cat .en*'), 'deny'],
   ['Bash .e?v', bashOf('cat .e?v'), 'deny'],
   ['Bash .[e]nv', bashOf('cat .[e]nv'), 'deny'],
+  ['Bash brace expansion', bashOf('cat .{e,}nv'), 'deny'],
+  ['Bash nested brace expansion', bashOf('cat .{x,e{n,}}v'), 'deny'],
+  ['Bash brace expansion over normal files', bashOf('cat {README,CHANGELOG}.md'), 'allow'],
   ['Bash .*', bashOf('cat .*'), 'deny'],
   ['Bash quoted glob', bashOf('find . -name ".e*"'), 'deny'],
   ['Bash *.pem', bashOf('cat *.pem'), 'deny'],
@@ -108,40 +111,63 @@ const CASES: [string, Call, Outcome][] = [
   ['Bash cat .aws/credentials', bashOf('cat ~/.aws/credentials'), 'deny'],
   ['Bash terraform show tfstate', bashOf('terraform show terraform.tfstate'), 'deny'],
   ['Bash ls UserSecrets', bashOf('ls ~/.microsoft/usersecrets/'), 'deny'],
+  ['dotnet user-secrets list', bashOf('dotnet user-secrets list'), 'deny'],
+  ['dotnet user-secrets list with a project', bashOf('dotnet user-secrets --project src/Api list --json'), 'deny'],
+  ['dotnet user-secrets set', bashOf('dotnet user-secrets set "Api:Url" "https://localhost"'), 'allow'],
+  ['dotnet user-secrets init', bashOf('dotnet user-secrets init --project src/Api'), 'allow'],
   ['Bash .pg*', bashOf('cat ~/.pg*'), 'deny'],
   ['Bash *.jks', bashOf('cp *.jks /tmp'), 'deny'],
   ['Bash *.tfstate', bashOf('ls *.tfstate'), 'deny'],
   ['Bash *secret*.json', bashOf('cat config/*secret*.json'), 'deny'],
+  ['Read .env.production', readOf('/repo/.env.production'), 'deny'],
+  ['C# DotNetEnv call', bashOf('grep -rn "DotNetEnv.Env.Load()" src'), 'allow'],
+  ['C# environment variable read', bashOf('grep -rn "Environment.GetEnvironmentVariable" src'), 'allow'],
+  ['Blazor host environment check', bashOf('grep -rn "builder.HostEnvironment.Environment" Client'), 'allow'],
+  ['Grep glob over C# and Razor files', { tool: 'Grep', pattern: 'x', glob: '*.{cs,razor}' }, 'allow'],
+  ['Python gym environment step', bashOf('grep -rn "self.env.step" src'), 'allow'],
+  ['Python os.environ read', bashOf('uv run python -c "import os; print(os.environ.get(\'HOME\'))"'), 'allow'],
+  ['Python dotenv import', bashOf('grep -rn "from dotenv import load_dotenv" src'), 'allow'],
+  ['Java KeyStore import', bashOf('grep -rn "import java.security.KeyStore;" src'), 'allow'],
+  ['Java getenv call', bashOf('grep -rn "System.getenv" src'), 'allow'],
+  ['NeoForge environment check', bashOf('grep -rn "FMLEnvironment.dist.isClient()" src'), 'allow'],
+  ['TypeScript import.meta.env', bashOf('grep -rn "import.meta.env" src'), 'allow'],
+  ['TypeScript import.meta.env member', bashOf('grep -rn "import.meta.env.VITE_API_URL" src'), 'allow'],
+  ['TypeScript process.env object', bashOf('node -e "console.log(process.env)"'), 'allow'],
+  ['TypeScript Deno.env read', bashOf('grep -rn "Deno.env.get" src'), 'allow'],
+  ['TypeScript Worker binding', bashOf('grep -rn "c.env.DB" src'), 'allow'],
+  ['Read a config.env.ts module', readOf('/repo/src/config.env.ts'), 'allow'],
+  ['Read vite-env.d.ts', readOf('/repo/src/vite-env.d.ts'), 'allow'],
+  ['Grep glob over TypeScript files', { tool: 'Grep', pattern: 'x', glob: '*.{ts,tsx}' }, 'allow'],
 ]
 
 describe('guard', () => {
   for (const [name, call, expected] of CASES) {
-    test(`${name} is ${expected}`, async ($, on) => {
+    test(`${expected === 'deny' ? 'denies' : 'allows'} the call when it is ${name}`, async ($, on) => {
       arrange(on, NO_LINKS)
 
       expect(await decide($, call)).toBe(expected)
     })
   }
 
-  test('symlink to .env is deny when the target exists', async ($, on) => {
+  test('denies a Read when its symlink targets .env', async ($, on) => {
     arrange(on, new Map([['/repo/notes.txt', linkTo('/repo/.env')]]))
 
     expect(await decide($, readOf('/repo/notes.txt'))).toBe('deny')
   })
 
-  test('symlink is deny when the target is missing', async ($, on) => {
+  test('denies a Read when its symlink target is missing', async ($, on) => {
     arrange(on, new Map([['/repo/notes.txt', linkTo()]]))
 
     expect(await decide($, readOf('/repo/notes.txt'))).toBe('deny')
   })
 
-  test('symlink to a normal file is allow', async ($, on) => {
+  test('allows a Read when its symlink targets a normal file', async ($, on) => {
     arrange(on, new Map([['/repo/notes.txt', linkTo('/repo/README.md')]]))
 
     expect(await decide($, readOf('/repo/notes.txt'))).toBe('allow')
   })
 
-  test('guard is deny when inspection throws', async ($, on) => {
+  test('denies the call when inspection throws', async ($, on) => {
     arrange(on, new Map([['/repo/notes.txt', null as never]]))
 
     expect(await decide($, readOf('/repo/notes.txt'))).toBe('deny')

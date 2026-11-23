@@ -5,8 +5,6 @@ The rules here hold whatever the data-access library. The data-access layer itse
 - **EF Core**: `data-access-efcore.md`. The repo is on EF Core when its data-access project references `Microsoft.EntityFrameworkCore.*`.
 - **Dapper** or other hand-written SQL: `data-access-dapper.md`.
 
-For the query-level mechanics behind the performance rules in `engineering-patterns`, read `dotnet-skills:database-performance` and `dotnet-skills:efcore-patterns`. The performance rules decide *which* fix to apply and in what order, and those skills cover how to write it.
-
 ## Which subsystem owns a type
 
 Projects and folders follow the subsystem model in the `engineering-patterns` architecture reference, and `Program.cs` is the composition root.
@@ -69,32 +67,6 @@ A repo may exempt specific files from the entity-versus-API split, such as an ex
 ## Canonical shapes
 
 Match these shapes rather than re-deriving them from the rules above. The data-access shapes are in the matching data-access file.
-
-Both directions of the entity boundary in one `internal` file of `extension(T)` blocks, with empty collections converted to null on the way down:
-
-```csharp
-internal static class OrderEntityMappingExtensions
-{
-    extension(OrderEntity entity)
-    {
-        public Order ToDomain() => new(entity.Id, entity.Number, entity.Lines?.ToList() ?? [])
-        {
-            Notes = entity.Notes?.ToList() ?? [],
-        };
-    }
-
-    extension(Order order)
-    {
-        public OrderEntity ToEntity() => new()
-        {
-            Id = order.Id,
-            Number = order.Number,
-            Lines = order.Lines.Count > 0 ? order.Lines.ToList() : null,
-            Notes = order.Notes.Count > 0 ? order.Notes.ToList() : null,
-        };
-    }
-}
-```
 
 An endpoint maps to the response type before returning:
 

@@ -14,7 +14,34 @@ The repository is the data-access layer. It is the only type that touches data e
 
 Every table read or written gets a `*Entity`. It is shaped by the table, so it holds the column nullability, the raw JSON string, and the identity key, and it stays behind the repository. It never doubles as the domain record, even when the two currently have the same members, because hand-written SQL has no model configuration to absorb a later difference in shape.
 
-Both directions of the entity boundary live in one `*EntityMappingExtensions.cs`, shaped as in `dotnet-layering.md`.
+Both directions of the entity boundary live in one `internal` `*EntityMappingExtensions.cs` of `extension(T)` blocks. A collection is stored as a JSON string, and an empty collection is stored as null:
+
+```csharp
+internal static class OrderEntityMappingExtensions
+{
+    extension(OrderEntity entity)
+    {
+        public Order ToDomain() => new(
+            entity.Id,
+            entity.Number,
+            entity.Lines is null ? [] : JsonSerializer.Deserialize<List<OrderLine>>(entity.Lines) ?? [])
+        {
+            Notes = entity.Notes is null ? [] : JsonSerializer.Deserialize<List<string>>(entity.Notes) ?? [],
+        };
+    }
+
+    extension(Order order)
+    {
+        public OrderEntity ToEntity() => new()
+        {
+            Id = order.Id,
+            Number = order.Number,
+            Lines = order.Lines.Count > 0 ? JsonSerializer.Serialize(order.Lines) : null,
+            Notes = order.Notes.Count > 0 ? JsonSerializer.Serialize(order.Notes) : null,
+        };
+    }
+}
+```
 
 ## Canonical shapes
 
@@ -25,6 +52,15 @@ internal interface IOrderRepository
 {
     Task<Order?> FindAsync(long id, CancellationToken cancellationToken);
     Task AddAsync(Order order, CancellationToken cancellationToken);
+}
+```
+
+The connection factory returns `DbConnection`, so a connection is disposed with `await using`:
+
+```csharp
+internal interface IDbConnectionFactory
+{
+    Task<DbConnection> OpenAsync(CancellationToken cancellationToken);
 }
 ```
 
@@ -46,7 +82,7 @@ internal sealed class OrderRepository(IDbConnectionFactory connections) : IOrder
 
     public async Task<Order?> FindAsync(long id, CancellationToken cancellationToken)
     {
-        using var connection = await connections.OpenAsync(cancellationToken);
+        await using var connection = await connections.OpenAsync(cancellationToken);
 
         var entity = await connection.QuerySingleOrDefaultAsync<OrderEntity>(
             new CommandDefinition(FindSql, new { Id = id }, cancellationToken: cancellationToken));
@@ -56,7 +92,7 @@ internal sealed class OrderRepository(IDbConnectionFactory connections) : IOrder
 
     public async Task AddAsync(Order order, CancellationToken cancellationToken)
     {
-        using var connection = await connections.OpenAsync(cancellationToken);
+        await using var connection = await connections.OpenAsync(cancellationToken);
 
         await connection.ExecuteAsync(
             new CommandDefinition(InsertSql, order.ToEntity(), cancellationToken: cancellationToken));

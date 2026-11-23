@@ -25,15 +25,13 @@ Spotless with palantir-java-format owns all layout **(tooling)**. Run `./gradlew
 - Domain collections are `List<T>`, `Set<T>`, or `Map<K, V>`, and the empty literal is `List.of()`. Collections returned to a caller are unmodifiable.
 - A hoisted constant is a `private static final` field, and a hoisted collection is built with `List.of` or `Set.of`.
 - `var` where the initializer states the type, such as a constructor call or a factory named for its type. An explicit type everywhere else.
-- A `switch` uses arrow labels, so no case falls through.
+- A `switch` uses arrow labels, so no case falls through to the next.
 - A type test binds a pattern variable, `if (shape instanceof Circle circle)`, rather than casting after `instanceof`.
 - Time comes from `java.time` through an injected `Clock`, so a test fixes it with `Clock.fixed`. Production code never calls a no-argument `now()`.
 
 ## Exceptions
 
-- An expected domain failure is a case of a sealed `Result`, so a thrown exception means a bug or an infrastructure failure, and it is unchecked.
-- A checked exception from a library is caught at the narrowest scope that can act on it. It is either handled there or rethrown wrapped in an unchecked exception with the original as its cause.
-- A catch specifies the narrowest type it handles. `Exception` and `Throwable` are caught only at an entry point's last-resort handler.
+- A thrown exception is unchecked. A checked exception from a library that isn't handled is rethrown wrapped in an unchecked exception.
 - A caught `InterruptedException` restores the flag with `Thread.currentThread().interrupt()` before anything else.
 
 ## Visibility and layout
@@ -60,7 +58,7 @@ Logging goes through SLF4J, with parameterized `{}` messages and the exception a
 
 ## Observability
 
-A deployed service uses Logback as the SLF4J backend and runs with the OpenTelemetry Java agent. The agent instruments the HTTP server and client, JDBC, and Logback, and puts `trace_id` and `span_id` on every log event. A manual span for a domain operation is `@WithSpan` from `io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations`. `engineering-patterns` decides what must be instrumented and what earns a metric.
+A deployed service uses Logback as the SLF4J backend and runs with the OpenTelemetry Java agent. The agent instruments the HTTP server and client, JDBC, and Logback, and puts `trace_id` and `span_id` on every log event. A manual span for a domain operation is `@WithSpan` from `io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations`. `engineering-patterns` decides what must be instrumented and what gets a metric.
 
 ## Resources
 
@@ -81,7 +79,7 @@ The ruled-out mechanisms are `@SuppressWarnings`, Error Prone `-Xep:<Check>:OFF`
 - An expected exception is asserted with `assertThatExceptionOfType(X.class).isThrownBy(...)` and then on its typed fields, never with `withMessage` or `hasMessage`.
 - A class without value equality is compared with `usingRecursiveComparison()` rather than field by field.
 - Endpoint authorization is one `@ParameterizedTest`.
-- Test data comes from Datafaker (`net.datafaker:datafaker`). Each domain type gets one faker class in the test-support module that builds it from generated values, with a `withX` override for each property a test may pin.
+- Test data comes from Datafaker (`net.datafaker:datafaker`). Each domain type gets one faker class that builds it from generated values, with a `withX` override for each property a test may pin.
 - Mockito appears only at the true external boundaries the `engineering-patterns` testing reference allows.
 - The shared test-support module is the `java-test-fixtures` Gradle plugin's `src/testFixtures/java` source set. Other projects consume it with `testImplementation(testFixtures(project(":<name>")))`.
 - Integration tests live in their own source set, declared through Gradle's JVM Test Suite plugin.

@@ -1,7 +1,5 @@
 # C# Style
 
-`dotnet-skills:csharp-coding-standards` covers what this file and `engineering-patterns` don't.
-
 ## Nullability
 
 - `is null` and `is not null`, never `== null`. No first-party analyzer covers this. Roslynator RCS1248 does, and it correctly leaves expression trees alone, so in a repo referencing that package with `dotnet_diagnostic.RCS1248.severity = warning` this is **(tooling)**. Everywhere else you apply it by hand.
@@ -28,7 +26,7 @@
 
 - The trailing cancellation parameter is a `CancellationToken` named `cancellationToken`, never `ct`.
 - A value hoisted out of a signature is a `private static readonly` field.
-- A member that only returns a value is a property, never a noun-named method.
+- A member that takes no arguments, has no side effects, and only returns a value is a property, never a method.
 - Return the concrete type when it is known, so `MemoryStream` rather than `Stream`.
 - Return a named record, never a tuple, private helpers included.
 - Resolve a name collision by renaming the type, never with a `using` alias.
@@ -47,12 +45,18 @@ A catch that expects its exception logs through the feature's `*Log.cs` extensio
 
 ## Observability
 
-Serilog is the logging framework. It is registered as the `ILogger` provider, so the `[LoggerMessage]` calls flow through it, and it exports to OpenTelemetry through `Serilog.Sinks.OpenTelemetry`. For setup, semantic conventions, exporter configuration, and instrumentation API details, read `dotnet-skills:opentelementry-dotnet-instrumentation`, plus `dotnet-skills:aspire-service-defaults` when the shared wiring belongs in one place. `engineering-patterns` decides what must be instrumented and what earns a metric, and those cover how to wire it.
+Serilog is the logging framework. It is registered as the `ILogger` provider, so the `[LoggerMessage]` calls flow through it, and it exports to OpenTelemetry through `Serilog.Sinks.OpenTelemetry`. `engineering-patterns` decides what must be instrumented and what gets a metric.
 
 ## HTTP
 
 - Never `new HttpClient(...)`. Use `IHttpClientFactory` or a typed `AddHttpClient<T>` registration.
 - POST endpoints take a JSON body, not query-string flags.
+
+## Time, resources, and exceptions
+
+- Time comes from an injected `TimeProvider`, and a test fakes it with `FakeTimeProvider` from `Microsoft.Extensions.TimeProvider.Testing`.
+- A disposable is disposed with `using`, or `await using` when it implements `IAsyncDisposable`.
+- A wrapped exception passes the original as its `innerException`.
 
 ## Control flow
 
@@ -60,7 +64,7 @@ Braces on every body are IDE0011 via `csharp_prefer_braces`, but an `IDE*` rule 
 
 ## Await
 
-Never dereference an awaited call in place. `(await GetAsync()).Name` and `(await GetAsync()).Should().Be(x)` both get an `await` on its own line first, landing in a named local that the next line reads. The parenthesized form hides what was awaited inside the parentheses, and the local is what makes the line say which value is being asserted on.
+Never dereference an awaited call in place. `(await GetAsync()).Name` and `(await GetAsync()).Should().Be(x)` both get an `await` on its own line first, landing in a named local that the next line reads. The parenthesized form hides what was awaited inside the parentheses, and the local is what makes the line say which value the assertion checks.
 
 ```csharp
 var saved = await File.ReadAllBytesAsync(path, cancellationToken);
@@ -75,7 +79,9 @@ The ruled-out mechanisms are `#pragma`, `[SuppressMessage]`, and csproj `<NoWarn
 ## Tests
 
 - Names are `Method_ExpectedBehavior_Condition`, such as `Ship_RejectsOrder_WhenAlreadyShipped`.
-- Run the red with `dotnet test --filter`.
+- Tests run on xUnit.net, through the latest `xunit.v3` package, on Microsoft.Testing.Platform. The test project sets `<UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>`, and the repo's `global.json` sets `"test": { "runner": "Microsoft.Testing.Platform" }`.
+- Assertions use AwesomeAssertions, never FluentAssertions.
+- Run the red with `dotnet test --filter-method` and the test's fully qualified name.
 - Endpoint authorization is one `Theory` of role to status code.
 - Test data comes from Bogus, with `Soenneker.Utils.AutoBogus` where auto-generation is needed and never the abandoned `AutoBogus`. Each domain type gets one `Faker<T>`.
 - The shared test-support module is one TestSupport project referenced by every test project.
@@ -104,13 +110,13 @@ A domain record with non-null collections initialized to `[]` and a hoisted cons
 ```csharp
 internal sealed record Order(long Id, string Number, IReadOnlyList<OrderLine> Lines)
 {
-    private static readonly string[] _openStatuses = ["Placed", "Packing"];
+    private static readonly OrderStatus[] _openStatuses = [OrderStatus.Placed, OrderStatus.Packing];
 
-    public string Status { get; init; } = string.Empty;
+    public OrderStatus Status { get; init; }
 
     public IReadOnlyList<string> Notes { get; init; } = [];
 
-    public bool IsOpen() => _openStatuses.Contains(Status);
+    public bool IsOpen => _openStatuses.Contains(Status);
 }
 ```
 

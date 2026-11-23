@@ -8,14 +8,20 @@ const BLAZOR = `${STANDARDS}/blazor.md`
 const TESTING = 'engineering-patterns/references/testing.md'
 const EXEMPT_PATH = /^\/tmp\/|\/scratchpad\/|\/\.venv\/|\/obj\/|\/bin\/|\/node_modules\//
 const TEST_PATH = /\/[Tt]ests?\/|\/[^/]*Tests?(\/|\.(cs|razor)$)|\/test_[^/]*\.py$|\/[^/]*_test\.py$|\/conftest\.py$/
-const REFERENCES_BY_EXTENSION = new Map([
-  ['py', [PYTHON]],
-  ['cs', [CSHARP, FORMATTING]],
-  ['razor', [BLAZOR, CSHARP, FORMATTING]],
-])
+const REFERENCES_BY_SUFFIX: [string, string[]][] = [
+  ['.py', [PYTHON]],
+  ['.razor.cs', [BLAZOR, CSHARP, FORMATTING]],
+  ['.razor.css', [BLAZOR]],
+  ['.razor', [BLAZOR, CSHARP, FORMATTING]],
+  ['.cs', [CSHARP, FORMATTING]],
+]
+
+function toForwardSlashes(path: string): string {
+  return path.replaceAll('\\', '/')
+}
 
 function listRequiredReferences(file: string): string[] {
-  const references = EXEMPT_PATH.test(file) ? undefined : REFERENCES_BY_EXTENSION.get(file.split('.').pop() ?? '')
+  const references = EXEMPT_PATH.test(file) ? undefined : REFERENCES_BY_SUFFIX.find(([suffix]) => file.endsWith(suffix))?.[1]
   if (references === undefined) {
     return []
   }
@@ -34,11 +40,13 @@ function listFullReads(transcript: SessionMessage[]): string[] {
     .filter(use => use.tool === 'Read' && use.isError === undefined && use.input.offset === undefined && use.input.limit === undefined)
     .map(use => use.input.file_path)
     .filter(path => typeof path === 'string')
+    .map(toForwardSlashes)
 }
 
 export function registerStandardsGate(on: On) {
   on('tool.call', { tool: ['Edit', 'Write'] }, async ($, e, next) => {
-    const required = listRequiredReferences(e.file_path)
+    const file = toForwardSlashes(e.file_path)
+    const required = listRequiredReferences(file)
     if (required.length === 0) {
       return next(e)
     }
@@ -51,6 +59,6 @@ export function registerStandardsGate(on: On) {
     if (missing.length === 0) {
       return next(e)
     }
-    return { deny: writeDenial(missing.map(reference => `${$.plugin.root}/skills/${reference}`), e.file_path) }
+    return { deny: writeDenial(missing.map(reference => `${$.plugin.root}/skills/${reference}`), file) }
   }).catch(($, e, next) => next(e))
 }

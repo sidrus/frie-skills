@@ -14,7 +14,7 @@
     {
       "name": "secret-files-guard",
       "source": "./plugins/secret-files-guard",
-      "description": "Denies tool calls that reach a secrets file (.env, *.local.json, credential stores, private keys) by name, symlink, or glob.",
+      "description": "Denies tool calls that reach a secrets file (.env, *.local.json, credential stores, private keys) through a path or a glob.",
       "category": "security"
     }
   ]

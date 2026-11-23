@@ -26,7 +26,7 @@ Text written on Brandon's behalf, such as docs, PR descriptions, commit messages
 - Lead with the decision, then give a short reason, as in "Dropped the GUID. UserIndex is already unique per source."
 - Use "we" for the team and the system, and "I" only for Brandon's own preferences.
 - Give numbers and verified facts in place of adjectives.
-- State scope explicitly, including what is left out.
+- State scope explicitly, including what it excludes.
 - In design writing, move from the problem to the principle, then the mechanism, then the benefit.
 
 Finished products such as docs, PR descriptions, and work items are polished, grammatical, and free of typos. PR comments and commit messages can be less formal but still read well.
@@ -37,7 +37,7 @@ State as fact only what you verified. Where code is (uncommitted, on a branch, m
 
 ## Explanations
 
-Explain with the causal chain: what you saw, what it changes, and what you recommend. Leave out what you tried, weighed, or ruled out. A question to the reader includes that chain and a recommendation, so it can be answered from the one message.
+Explain with the causal chain: what you saw, what it changes, and what you recommend. Omit what you tried, weighed, or rejected. A question to the reader includes that chain and a recommendation, so it can be answered from the one message.
 
 ## Documentation
 
@@ -48,7 +48,7 @@ Explain with the causal chain: what you saw, what it changes, and what you recom
 
 ## Pull request descriptions
 
-Use the headings Overview, Code Changes, Database Changes, and Testing Performed, in that order, and omit any that don't apply. The overview is one sentence, and every other section is one-line bullets. Include only what a reviewer can't see in the diff, so no per-object tables or file walkthroughs.
+Follow the repo's pull request template when it has one. Otherwise, write a one-sentence overview, then one-line bullets. Include only what a reviewer can't see in the diff, so no per-object tables or file walkthroughs.
 
 ## Code comments
 

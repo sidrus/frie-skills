@@ -3,7 +3,7 @@ import type { On } from 'claude-code'
 export type ToolInput = { readonly tool: string; readonly [field: string]: unknown }
 
 const BRITISH = new RegExp(
-  String.raw`[a-z]*((real|organ|recogn|priorit|initial|serial|normal|optim|author|custom|minim|maxim|summar|final|categor|standard|util|emphas|apolog|synchron|visual|local|material|parameter|sanit|token|character|memor|capital|special|general|central|critic|modern|stabil)is(e[ds]?|ing|ation)|cancell(ed|ing)|(model|label|level|signal|total|travel|fuel)l(ed|ing|er)|fulfil(?!l)|judgement|behaviour|honour|neighbour|labour|rumour|colour|favour|licence|centre|metre|analys(e[ds]?|ing)|defence|catalogue|grey|programme(?![rd]))[a-z]*`,
+  String.raw`[a-z]*((real|organ|recogn|priorit|initial|serial|normal|optim|author|custom|minim|maxim|summar|final|categor|standard|util|emphas|apolog|synchron|visual|local|material|parameter|sanit|token|character|memor|capital|special|general|central|critic|modern|stabil)is(e[ds]?|ing|ation)|cancell(ed|ing)|(model|label|level|signal|total|travel|fuel)l(ed|ing|er)|fulfil(?!l)|judgement|behaviour|honour|neighbour|labour|rumour|colour|favour|flavour|humour|harbour|armour|endeavour|rigour|vigour|odour|vapour|savour|licence|centre|metre|analys(ed|e(?!s)|ing)|defence|catalogue|grey|programme(?![rd]))[a-z]*`,
   'gi',
 )
 const MAX_WORDS = 12
@@ -12,18 +12,13 @@ function selectStrings(values: unknown[]): string[] {
   return values.filter((value): value is string => typeof value === 'string')
 }
 
-function listEdits(call: ToolInput): Record<string, unknown>[] {
-  return Array.isArray(call.edits) ? call.edits : []
-}
-
 function listWords(texts: string[]): string[] {
   return texts.flatMap(text => text.match(BRITISH) ?? [])
 }
 
 export function findBritishSpellings(call: ToolInput): string[] {
-  const edits = listEdits(call)
-  const added = listWords(selectStrings([call.content, call.new_string, call.new_source, ...edits.map(edit => edit.new_string)]))
-  const existing = new Set(listWords(selectStrings([call.old_string, ...edits.map(edit => edit.old_string)])).map(word => word.toLowerCase()))
+  const added = listWords(selectStrings([call.content, call.new_string, call.new_source]))
+  const existing = new Set(listWords(selectStrings([call.old_string])).map(word => word.toLowerCase()))
   const found = new Map<string, string>()
   for (const word of added) {
     const key = word.toLowerCase()

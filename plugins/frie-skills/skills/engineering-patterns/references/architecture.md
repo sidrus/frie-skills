@@ -61,9 +61,9 @@ tests/
 
 ## Code layout
 
-The folder tree is the subsystem tree, so reading it alone shows every subsystem the application has and what each one is responsible for.
+The folder tree is the subsystem tree, so reading it alone shows every subsystem the application has and the responsibility of each one.
 
-- **Every folder's name states what it is for**, either a subsystem (`Orders/`, `Authorization/`) or a feature inside one (`Placement/`). It is never named for a kind of type (`Models/`, `Extensions/`, `Helpers/`) or with a name that fits anything (`Infrastructure/`, `Common/`, `Utils/`), because those hide what the code does.
+- **Every folder's name states what it is for**, either a subsystem (`Orders/`, `Authorization/`) or a feature inside one (`Placement/`). It is never named for a kind of type (`Models/`, `Extensions/`, `Helpers/`) or with a name that fits anything (`Infrastructure/`, `Common/`, `Utils/`), because those hide what the code does. The test is whether the folder has one responsibility its name states. A word that is also a kind of type doesn't fail it: a `Controls/` folder that is the app's control library passes, and a `Components/` folder that holds every component fails.
 - **An internal type lives beside its consumer.** When a second consumer in the same subsystem appears, the type moves outward only as far as the nearest folder both consumers share. A consumer in another subsystem puts the type in its owner's contract instead.
 
 ## Layer responsibilities
@@ -86,17 +86,19 @@ Data access is not unit tested. It delegates to its data source, so a unit test 
 
 A service returns a `Result`. The entry point translates that into its response. The error type and the arity are the repo's choice.
 
+An expected failure is a `Result` case, even when it is the only one. A thrown exception means a bug or an infrastructure failure.
+
 A `bool` or a bare `null` return cannot express why something failed, which forces the entry point to know that false means "already shipped" here and "out of stock" there. That is domain knowledge in the marshaling layer, so the entry point ends up owning a rule it is not allowed to own.
 
 A lookup whose only failure is absence returns the language's nullable type instead, because absence is the one reason it can express.
 
-## What earns a construct
+## When to add a construct
 
-| Construct | Earned by |
+| Construct | Justified by |
 |---|---|
 | Interface | Substitution. The practical test is "will I write a fake for this?" An external dependency and a contract operation always qualify, so an interface per class never does. |
 | Record | Pure data. |
-| Enum | Two or more members. A single member conveys no information, so a `Result` whose error type has one case says only that the call failed, which an exception already says. |
+| Enum | Two or more members. A single member conveys no information. |
 | Static pure function | Pure methods. Purity beats injection, because a total function never needs a seam. |
 | Its own class | Any branch or switch arm with a dependency, or with more than trivial behavior. Isolated behavior is easier to reason about and easier to test. |
 | Nothing at all | Pass-through and forwarding types. If the body only forwards, the type should not exist. |
@@ -141,7 +143,7 @@ Set-based work belongs in the database, not in memory after materializing rows.
 
 When a read needs to get faster, in order:
 
-1. **Index.** Costs nothing, risks nothing.
+1. **Index.** It changes no code and cannot return stale data.
 2. **Cache.** The TTL bounds staleness, and a stale entry is replaced when it expires.
 3. **Denormalize.** Last resort. A second copy of a value drifts silently and permanently, and a stale column produces no error.
 
@@ -156,6 +158,6 @@ The floor for any new service:
 - Span tags holding the same correlation identifiers the logs hold.
 - The logging framework routed through OpenTelemetry, so logs and traces correlate instead of living in two systems.
 
-Metrics are earned, not automatic. A metric exists because there is a number worth alerting on, such as throughput, queue depth, or failure rate. One counter per method is noise.
+Metrics are not automatic. A metric exists because there is a number worth alerting on, such as throughput, queue depth, or failure rate. One counter per method is noise.
 
 Cardinality is a design constraint. A correlation identifier belongs on a span and in a log line, never as a metric dimension.

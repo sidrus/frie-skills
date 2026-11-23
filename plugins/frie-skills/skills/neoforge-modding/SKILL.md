@@ -23,7 +23,6 @@ Registries, events, networking, data generation, GameTests, and serialization AP
 Minecraft's callbacks are the entry-point layer: `Block`, `Item`, `BlockEntity`, and `Entity` overrides, event subscribers, commands, and payload handlers. Each one reads game state, calls a decision, and applies the result. The decision lives in a plain class or a static pure function that takes values, so it is testable without a running world.
 
 - A decision takes the narrowest vanilla interface it needs, such as `BlockGetter`, `LevelReader`, `LevelWriter`, or `LevelAccessor`, rather than `Level` or `ServerLevel`. That interface is the seam a state-based fake implements.
-- Override and event-handler signatures are dictated by Minecraft and NeoForge, so the signature limits do not apply to them.
 - An event subscriber's class and handler methods are `public`, because the event bus requires it.
 
 ## Layout
@@ -56,8 +55,8 @@ Prefer, in order: an event, a NeoForge extension hook or interface, an access tr
 - Output goes to `src/generated/resources`, which the main source set includes as a resource directory and git tracks. A generated file changes only through its provider and a rerun. The `.cache` directory is gitignored and excluded from the jar.
 - One data run generates assets and data together with `--all`, and one gather-data handler registers every provider. The version reference gives the run type and the event's API.
 - Provider code lives in a `datagen` source set that the data run uses and the jar never contains. Its packages are named for the data kind (`loot`, `recipe`, `tag`, `model`, `lang`), because each provider covers one kind across every feature. A provider that spans many features splits into one class per feature or recipe type, which the kind's provider calls.
-- Datapack registry entries are built in a `RegistrySetBuilder` that registers before any other provider, and every later provider receives a lookup that contains them. The version reference says where that lookup comes from. Each entry's `ResourceKey` is a constant in its feature package, shared by game code and datagen.
-- Coverage validation stays on. The loot table provider's known blocks are the mod's registered blocks, so a block without a loot table fails the run, and a coverage failure is fixed by generating the missing file.
+- Datapack registry entries are built in a `RegistrySetBuilder` that registers before any other provider, and every later provider receives a lookup that contains them. The version reference says how a provider obtains that lookup. Each entry's `ResourceKey` is a constant in its feature package, shared by game code and datagen.
+- Coverage validation stays enabled. The loot table provider's known blocks are the mod's registered blocks, so a block without a loot table fails the run, and a coverage failure is fixed by generating the missing file.
 - The language provider takes block, item, and entity names from their registered holders, and fails the run when a registered object has no English name.
 - A material that another mod could also supply, such as an ingot, ore, or dust, gets the `c` namespace common tag, and recipes take that tag in place of the mod's own item. A tag key is a constant created once, and an item tag that mirrors a block tag is copied from the block tag.
 - Every recipe saves with an explicit ID of the form `<modid>:<recipe type>/<name>`, such as `examplemod:crushing/iron_ore`. Data that depends on an optional mod has a mod-loaded condition.

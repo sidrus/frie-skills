@@ -12,12 +12,6 @@ describe('findBritishSpellings', () => {
     expect(findBritishSpellings(edit)).toEqual([])
   })
 
-  test('returns words from every edit when MultiEdit adds them', () => {
-    const edit = { tool: 'MultiEdit', edits: [{ old_string: 'a', new_string: 'normalised' }, { old_string: 'b', new_string: 'cancelled' }] }
-
-    expect(findBritishSpellings(edit)).toEqual(['normalised', 'cancelled'])
-  })
-
   test('returns the word when a notebook cell adds it', () => {
     expect(findBritishSpellings({ tool: 'NotebookEdit', new_source: 'grey = 1' })).toEqual(['grey'])
   })
@@ -27,9 +21,19 @@ describe('findBritishSpellings', () => {
   })
 
   test('returns nothing when the words are American or merely similar', () => {
-    const content = 'programmer programmed fulfill fulfilled modeled behavior realize'
+    const content = 'programmer programmed fulfill fulfilled modeled behavior realize analyses'
 
     expect(findBritishSpellings({ tool: 'Write', content })).toEqual([])
+  })
+
+  test('returns the less common -our spellings when Write content adds them', () => {
+    const words = ['flavours', 'humour', 'harbour', 'armour', 'endeavour', 'rigour', 'vigour', 'odour', 'vapour', 'savoury']
+
+    expect(findBritishSpellings({ tool: 'Write', content: words.join(' ') })).toEqual(words)
+  })
+
+  test('returns the British verb forms of analyze when Write content adds them', () => {
+    expect(findBritishSpellings({ tool: 'Write', content: 'analyse analysed analysing' })).toEqual(['analyse', 'analysed', 'analysing'])
   })
 
   test('returns the stem forms when the patterns end a word', () => {
@@ -45,25 +49,25 @@ describe('findBritishSpellings', () => {
 
 describe('spelling reminder', () => {
   test('adds context when an edit adds a British spelling', async ($, on) => {
-    on('tool.call', () => ({ result: 'ran' }) as never)
+    on('tool.call', () => ({ result: 'ran' }))
 
-    const answer = await $.tool.call({ tool: 'Write', file_path: '/repo/notes.md', content: 'colour' } as never)
+    const answer = await $.tool.call({ tool: 'Write', file_path: '/repo/notes.md', content: 'colour' })
 
     expect(answer.context?.length).toBe(1)
   })
 
   test('adds no context when the edit is clean', async ($, on) => {
-    on('tool.call', () => ({ result: 'ran' }) as never)
+    on('tool.call', () => ({ result: 'ran' }))
 
-    const answer = await $.tool.call({ tool: 'Write', file_path: '/repo/notes.md', content: 'color' } as never)
+    const answer = await $.tool.call({ tool: 'Write', file_path: '/repo/notes.md', content: 'color' })
 
     expect(answer.context).toBeUndefined()
   })
 
   test('adds no context when the edit failed', async ($, on) => {
-    on('tool.call', () => ({ result: 'no match', isError: true }) as never)
+    on('tool.call', () => ({ result: 'no match', isError: true }))
 
-    const answer = await $.tool.call({ tool: 'Edit', file_path: '/repo/notes.md', old_string: 'x', new_string: 'colour' } as never)
+    const answer = await $.tool.call({ tool: 'Edit', file_path: '/repo/notes.md', old_string: 'x', new_string: 'colour' })
 
     expect(answer.context).toBeUndefined()
   })

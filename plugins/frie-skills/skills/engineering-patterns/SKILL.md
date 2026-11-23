@@ -13,11 +13,13 @@ Each rule states an intent, and each language expresses it in its own idiom. Whe
 
 ## Precedence
 
+The user's own instructions, and any standards those instructions rank above these skills, win over everything below.
+
 1. The repo's own `CLAUDE.md` or `AGENTS.md` wins for repo-specific facts: schema names, package versions, folder layout, exemption lists, gate commands.
 2. The frie-skills skills win for style, layering, and policy. A framework skill wins over a language reference, which wins over this skill, on the points where they deliberately differ.
-3. Generic installed skills cover what neither of the above does. Each language reference lists the ones that apply. Where they conflict with frie-skills, frie-skills wins.
+3. Other installed skills cover what neither of the above does. Where they conflict with frie-skills, frie-skills wins.
 
-Existing code that disagrees with these skills is drift, not precedent. Write to the skills unless the repo's `CLAUDE.md` or `AGENTS.md` overrides them. Fix drift in every file a change already touches, in the same change, and list those fixes in the report apart from the feature work.
+Existing code that disagrees with these skills is drift, not precedent. Write to the skills unless the repo's `CLAUDE.md` or `AGENTS.md` overrides them. Code a change writes or rewrites follows the skills. Drift elsewhere, including elsewhere in a file the change touches, is listed in the report and not fixed unless asked.
 
 Rules marked **(tooling)** are enforceable by an analyzer, formatter, or type checker, but whether they are enforced is per repo. Check what the repo actually configures. Where a rule is enforced, write it correctly the first time and don't spend review comments on it, because the build catches it. Where it isn't, the rule still holds and you apply it by hand.
 
@@ -25,7 +27,7 @@ Rules marked **(tooling)** are enforceable by an analyzer, formatter, or type ch
 
 | Touching | Read |
 |---|---|
-| designing anything: a new feature, a new type, a seam, a state change, a query, a service | `references/architecture.md` first. It defines subsystems and their contracts, and decides what earns an interface, where logic lives, and what YAGNI does and does not govern. |
+| designing anything: a new feature, a new type, a seam, a state change, a query, a service | `references/architecture.md` first. It defines subsystems and their contracts, and decides when a type gets an interface, where logic lives, and what YAGNI does and does not govern. |
 | any test file | `references/testing.md` |
 
 Read the reference **before** the first edit, not as a check afterward. Skip it only for a change that touches no code, such as a docs or config edit. The rules below apply either way.
@@ -48,7 +50,7 @@ Name an operation for what it means in the domain, such as `BlockHost` and `Unbl
 
 - Handle absence explicitly, with a guard that fails loudly or with a fallback. Never use a non-null assertion.
 - No redundant null guards. If the target accepts null, assign directly.
-- Collections are never null. Empty is the absent case, initialized to the language's empty literal. Nullability on a collection belongs only on a persistence type, so the column stores NULL rather than an empty array, and the mapping converts empty to null and back.
+- Collections are never null. Empty is the absent case, initialized to the language's empty literal. Nullability on a collection belongs only on a persistence type, so the column stores NULL rather than an empty array, and the mapping converts empty to null on write and null to empty on read.
 - No inline constant arrays at repeated call sites. Hoist them to a named constant.
 
 ## Control flow
@@ -71,7 +73,7 @@ The wording of comments, docs, and messages follows the `writing-style-guide` sk
 
 If the user deleted a comment or a block of code, it stays deleted.
 
-A comment that turns out to be wrong or misleading gets deleted, not corrected. Rewriting it to be accurate is still adding a comment, and the code and config already say what is true.
+A comment that turns out to be wrong or misleading gets deleted, not corrected, because the code and config already say what is true. A required comment, such as a doc comment on a contract or the reason on a suppression, gets corrected instead, since deleting it breaks the rule that requires it.
 
 ## Design
 
@@ -80,24 +82,22 @@ These apply to every decision regardless of layer. Structure, state, performance
 - The simplest solution that solves the problem wins. This governs the size of what you build, never whether the code you do build is properly structured.
 - No code without a current requirement (YAGNI), because until the requirement exists you do not know what to build. Speculative abstractions, fan-out over one implementation, extension points for changes nobody asked for, and configuration for values that do not vary all get cut.
 - Surface simplifications unprompted during design work.
-- When a decision changes, re-derive everything downstream of it. Treat every remaining element as unjustified until it re-earns its place, rather than patching around a superseded decision.
+- When a decision changes, re-derive everything downstream of it. Treat every remaining element as unjustified until the new decision justifies it again, rather than patching around a superseded decision.
 - Classify errors at the call site, where the type and the stage are both known. Dispatch on exception type or structured fields, never on message text.
+- A catch sits at the narrowest scope that can act on the failure and catches only the narrowest exception type it handles. It handles the failure there or rethrows it wrapped, with the original as its cause. A catch-all appears only in an entry point's last-resort handler.
+- Time comes from an injected clock, so a test can fix it. Production code never reads the system time directly.
+- Every resource is released by the language's scoped construct.
 - Push integrity and cleanup into the database (foreign key cascades, constraints) rather than app-ordered deletes or application-side locking. A constraint stays within one subsystem's storage.
 
 ## Testing, in brief
 
-`references/testing.md` has the full detail. These are never negotiable:
+Read `references/testing.md` before writing or changing a test.
 
 - TDD for anything with real behavior. Run the failing test and show its output before writing implementation, every cycle.
-- Behavior only. No tests for 1:1 mappers, pass-through wrappers, options records, path literals, or feature-flag toggles, and no chasing a coverage percentage.
-- No persistence round-trip or schema-confirmation tests. The database does its job.
-- Assert on values, never on booleans.
-- Assert on observable state, never on strings, because a string assertion breaks when wording changes and behavior doesn't. The only exception is when the string is the observable output and the spec gives its exact value.
-- Test data comes from a Faker library. A literal appears only where the behavior under test depends on that exact value.
 
 ## Suppressions
 
-Never suppress a warning, including style rules. Redesign so the warning does not fire, at every call site. Each language reference lists the suppression mechanisms it rules out. If a warning is a genuine false positive, ask. An approved suppression states its reason in a justification field where the mechanism has one, and on the suppression line where it does not.
+Never suppress a warning, including style rules. Redesign so the warning does not fire, at every call site. Each language reference lists the suppression mechanisms it forbids. If a warning is a genuine false positive, ask. An approved suppression states its reason in a justification field where the mechanism has one, and on the suppression line where it does not.
 
 Static analysis findings are authoritative, and only an existing suppression opts out of one. Where a finding contradicts a convention in these skills, the finding wins at the line it flags and the convention holds everywhere else.
 

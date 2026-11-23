@@ -14,7 +14,7 @@ EF already provides the repository and the unit of work. `DbSet<T>` is the repos
 
 The domain record is what `DbSet<T>` holds. `OnModelCreating` covers differences in column shape with value conversions, owned types, JSON columns, and a `ValueComparer` for converted collections. Expression-tree lambdas in that configuration follow the `== null` and `Array.Empty<T>()` exceptions in `csharp.md`.
 
-A separate `*Entity` with `*EntityMappingExtensions.cs` earns its place only when model configuration cannot express the difference between the table and the record. Then it follows the entity rules in `data-access-dapper.md` for that one type.
+A separate `*Entity` with `*EntityMappingExtensions.cs` is justified only when model configuration cannot express the difference between the table and the record. Then it follows the entity rules in `data-access-dapper.md` for that one type.
 
 ## Queries
 
@@ -40,7 +40,7 @@ Integrity lives in the database, so a write can come back as a constraint violat
 
 ## Testing
 
-Integration tests run against the real provider through Testcontainers. The EF in-memory provider and SQLite stand-ins are not substitutes, because they skip the constraints and SQL translation that the behavior depends on.
+Integration tests run against the real provider through Testcontainers. The EF in-memory provider and SQLite stand-ins are not substitutes, because they skip the constraints and SQL translation that determine the behavior.
 
 ## Canonical shapes
 

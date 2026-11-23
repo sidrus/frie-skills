@@ -17,7 +17,7 @@ Block and item properties hold the object's registry ID. Blocks register through
 - Providers register through `event.createProvider(...)`, which passes the `PackOutput` and lookup to the provider's constructor. Block and item tags register together through `event.createBlockAndItemTags(...)`, with item tags extending `BlockTagCopyingItemTagProvider`.
 - Models, blockstates, and client items all come from one `ModelProvider` that overrides `registerModels(BlockModelGenerators, ItemModelGenerators)`. A `BlockItem` with no generated client item gets one that points at its block model. A missing texture slot or a duplicate model fails the run. `getKnownBlocks()` and `getKnownItems()` drive the provider's model validation, so they keep their defaults or return the mod's registered entries.
 - Recipes come from a `RecipeProvider` that overrides `buildRecipes()`, registered through a nested class extending `RecipeProvider.Runner`.
-- On 26.3, recipes and loot tables register as registry bootstraps in place of providers. The docs do not cover this yet, so the source for it is the NeoForge release notes and the MDK for that version.
+- On 26.3, recipes and loot tables register as registry bootstraps in place of providers. Where the docs for that version do not cover this, the source is the NeoForge release notes and the MDK for that version.
 
 ## GameTests
 
