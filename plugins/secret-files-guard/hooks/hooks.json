@@ -1,18 +1,3 @@
 {
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash|Read|Edit|Write|NotebookEdit|Grep|Glob|mcp__rider__.*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/block-secret-files.sh",
-            "timeout": 10,
-            "onFailure": "block",
-            "statusMessage": "Checking for *.local.json and .env access..."
-          }
-        ]
-      }
-    ]
-  }
+  "modules": ["./register.ts"]
 }
