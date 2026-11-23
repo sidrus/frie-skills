@@ -58,7 +58,7 @@ Skills install namespaced, so `brandon-standards` is invoked as `frie-skills:bra
 ## Test
 
 ```
-tests/hooks.test.sh
+plugins/frie-skills/tests/hooks.test.sh
 plugins/secret-files-guard/tests/block-secret-files.test.sh
 ```
 
@@ -72,5 +72,5 @@ Bump `version` in the changed plugin's `.claude-plugin/plugin.json`, push, then 
 
 ## Add a skill
 
-Put it in `skills/<name>/SKILL.md` and add `./skills/<name>` to the `skills` list in
-`.claude-plugin/plugin.json`.
+Put it in `plugins/frie-skills/skills/<name>/SKILL.md` and add `./skills/<name>` to the `skills`
+list in `plugins/frie-skills/.claude-plugin/plugin.json`.

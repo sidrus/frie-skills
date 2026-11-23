@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "frie-skills",
-      "source": "./",
+      "source": "./plugins/frie-skills",
       "description": "Brandon Frie's engineering patterns, language standards, NeoForge conventions, and prose style.",
       "category": "engineering"
     },
