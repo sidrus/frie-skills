@@ -63,7 +63,7 @@ tests/
 
 The folder tree is the subsystem tree, so reading it alone shows every subsystem the application has and what each one is responsible for.
 
-- **Every folder names what it is for**, either a subsystem (`Orders/`, `Authorization/`) or a feature inside one (`Placement/`). It is never named for a kind of type (`Models/`, `Extensions/`, `Helpers/`) or with a name that fits anything (`Infrastructure/`, `Common/`, `Utils/`), because those hide what the code does.
+- **Every folder's name states what it is for**, either a subsystem (`Orders/`, `Authorization/`) or a feature inside one (`Placement/`). It is never named for a kind of type (`Models/`, `Extensions/`, `Helpers/`) or with a name that fits anything (`Infrastructure/`, `Common/`, `Utils/`), because those hide what the code does.
 - **An internal type lives beside its consumer.** When a second consumer in the same subsystem appears, the type moves outward only as far as the nearest folder both consumers share. A consumer in another subsystem puts the type in its owner's contract instead.
 
 ## Layer responsibilities
@@ -76,7 +76,7 @@ Inside a subsystem, three layers each have one job:
 | Service | All business logic. | Nothing that belongs to the layers either side of it. |
 | Data access | Read and write domain records, through a repository or the ORM's own context. | Any business logic. |
 
-The entry point is whatever the framework calls into: an HTTP endpoint, a UI event handler, a message consumer, a game engine callback. A framework skill names its entry points.
+The entry point is whatever the framework calls into: an HTTP endpoint, a UI event handler, a message consumer, a game engine callback. A framework skill lists its entry points.
 
 An entry point may read through data access directly when it makes no decision at all, which is the pure passthrough read. One branch, one normalization, or one rule and a service owns it.
 
@@ -86,9 +86,9 @@ Data access is not unit tested. It delegates to its data source, so a unit test 
 
 A service returns a `Result`. The entry point translates that into its response. The error type and the arity are the repo's choice.
 
-A `bool` or a bare `null` return cannot carry why something failed, which forces the entry point to know that false means "already shipped" here and "out of stock" there. That is domain knowledge in the marshaling layer, so the entry point ends up owning a rule it is not allowed to own.
+A `bool` or a bare `null` return cannot express why something failed, which forces the entry point to know that false means "already shipped" here and "out of stock" there. That is domain knowledge in the marshaling layer, so the entry point ends up owning a rule it is not allowed to own.
 
-A lookup whose only failure is absence returns the language's nullable type instead, because absence is the one reason it can carry.
+A lookup whose only failure is absence returns the language's nullable type instead, because absence is the one reason it can express.
 
 ## What earns a construct
 
@@ -96,7 +96,7 @@ A lookup whose only failure is absence returns the language's nullable type inst
 |---|---|
 | Interface | Substitution. The practical test is "will I write a fake for this?" An external dependency and a contract operation always qualify, so an interface per class never does. |
 | Record | Pure data. |
-| Enum | Two or more members. A single member carries no information, so a `Result` whose error type has one case says only that the call failed, which an exception already says. |
+| Enum | Two or more members. A single member conveys no information, so a `Result` whose error type has one case says only that the call failed, which an exception already says. |
 | Static pure function | Pure methods. Purity beats injection, because a total function never needs a seam. |
 | Its own class | Any branch or switch arm with a dependency, or with more than trivial behavior. Isolated behavior is easier to reason about and easier to test. |
 | Nothing at all | Pass-through and forwarding types. If the body only forwards, the type should not exist. |
@@ -153,7 +153,7 @@ The floor for any new service:
 
 - Auto-instrumentation for the web framework, the HTTP client, and the database.
 - A manual span for every domain operation that can fail or run for an unbounded time.
-- Span tags carrying the same correlation identifiers the logs carry.
+- Span tags holding the same correlation identifiers the logs hold.
 - The logging framework routed through OpenTelemetry, so logs and traces correlate instead of living in two systems.
 
 Metrics are earned, not automatic. A metric exists because there is a number worth alerting on, such as throughput, queue depth, or failure rate. One counter per method is noise.

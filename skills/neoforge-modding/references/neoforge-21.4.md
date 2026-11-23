@@ -8,7 +8,7 @@ Applies when `neo_version` is 21.4 or later, which covers Minecraft 1.21.4 onwar
 
 ## Registration
 
-Block and item properties carry the object's registry ID. Blocks register through `DeferredRegister.Blocks#registerBlock` and items through `DeferredRegister.Items#registerItem`, `registerSimpleItem`, or `registerSimpleBlockItem`, which set the ID before calling the factory.
+Block and item properties hold the object's registry ID. Blocks register through `DeferredRegister.Blocks#registerBlock` and items through `DeferredRegister.Items#registerItem`, `registerSimpleItem`, or `registerSimpleBlockItem`, which set the ID before calling the factory.
 
 ## Data generation
 

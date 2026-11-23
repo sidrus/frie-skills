@@ -5,7 +5,7 @@ description: NeoForge Minecraft mod conventions, layered on the brandon-standard
 
 # NeoForge Modding
 
-**Invoke `frie-skills:brandon-standards` first and read its `java.md`.** That chain also loads `engineering-patterns`. This skill adds what is specific to a mod and names the shared rules a mod expresses differently. It never restates them.
+**Invoke `frie-skills:brandon-standards` first and read its `java.md`.** That chain also loads `engineering-patterns`. This skill adds what is specific to a mod and lists the shared rules a mod expresses differently. It never restates them.
 
 ## Version
 
@@ -59,8 +59,8 @@ Prefer, in order: an event, a NeoForge extension hook or interface, an access tr
 - Datapack registry entries are built in a `RegistrySetBuilder` that registers before any other provider, and every later provider receives a lookup that contains them. The version reference says where that lookup comes from. Each entry's `ResourceKey` is a constant in its feature package, shared by game code and datagen.
 - Coverage validation stays on. The loot table provider's known blocks are the mod's registered blocks, so a block without a loot table fails the run, and a coverage failure is fixed by generating the missing file.
 - The language provider takes block, item, and entity names from their registered holders, and fails the run when a registered object has no English name.
-- A material that another mod could also supply, such as an ingot, ore, or dust, carries the `c` namespace common tag, and recipes take that tag in place of the mod's own item. A tag key is a constant created once, and an item tag that mirrors a block tag is copied from the block tag.
-- Every recipe saves with an explicit ID of the form `<modid>:<recipe type>/<name>`, such as `examplemod:crushing/iron_ore`. Data that depends on an optional mod carries a mod-loaded condition.
+- A material that another mod could also supply, such as an ingot, ore, or dust, gets the `c` namespace common tag, and recipes take that tag in place of the mod's own item. A tag key is a constant created once, and an item tag that mirrors a block tag is copied from the block tag.
+- Every recipe saves with an explicit ID of the form `<modid>:<recipe type>/<name>`, such as `examplemod:crushing/iron_ore`. Data that depends on an optional mod has a mod-loaded condition.
 
 ## Text and serialization
 
@@ -89,7 +89,7 @@ Tests come in two tiers, and the gate runs both.
 - **GameTests** cover behavior that needs a real world: entities, block updates, structure placement, and events end to end. They live in a `gameTest` source set that the dev runs bind to the mod and the jar never contains, in the same packages as the code they test so they can reach package-private members. The version reference gives the registration API.
 - A GameTest name becomes a resource path, so it is lowercase snake case while keeping all three parts, such as `admits_refuses_zombie_when_destination_is_mining_dimension`.
 - The GameTest helper's assertions are the assertion library inside a GameTest.
-- The gate is the data run with a check that `git status --porcelain` prints nothing, then `./gradlew build`, then the repo's GameTest server run, unless the repo's `CLAUDE.md` or `AGENTS.md` names others. The client and server dev runs are not part of the gate.
+- The gate is the data run with a check that `git status --porcelain` prints nothing, then `./gradlew build`, then the repo's GameTest server run, unless the repo's `CLAUDE.md` or `AGENTS.md` specifies others. The client and server dev runs are not part of the gate.
 
 ## Canonical shape
 
