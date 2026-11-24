@@ -6,7 +6,7 @@ Brandon Frie's Claude Code marketplace, `frie`. Each language or framework is it
 
 | Plugin | Skills | Hook | Depends on |
 |---|---|---|---|
-| `frie-core` | `engineering-patterns`: language-neutral rules for design, architecture, testing, comments, and suppressions. `writing-style-guide`: prose style for docs, code comments, commit messages, and chat | `spelling.ts` adds a reminder to the context after an edit that adds a likely British spelling, and never blocks | |
+| `frie-core` | `engineering-patterns`: language-neutral rules for design, architecture, testing, comments, and suppressions. `writing-style-guide`: prose style for docs, code comments, commit messages, and chat | `engineering-gate.ts` denies an Edit or Write to a source code file until the same agent has invoked `engineering-patterns` since its last compaction or `/clear`. `spelling.ts` adds a reminder to the context after an edit that adds a likely British spelling, and never blocks | |
 | `frie-dotnet` | `standards`: how C#, .NET, and Blazor express the core rules | `standards-gate.ts` denies an Edit or Write to a `.cs`, `.razor`, or `.razor.css` file until the same agent has read the matching references in full since its last compaction or `/clear` | `frie-core` |
 | `frie-python` | `standards`: how Python expresses the core rules | `standards-gate.ts` does the same for a `.py` file | `frie-core` |
 | `frie-java` | `standards`: how Java expresses the core rules | `standards-gate.ts` does the same for a `.java` file or a Gradle build or settings file | `frie-core` |
@@ -89,6 +89,16 @@ npx -y -p typescript@5.9.3 tsc -p plugins/secret-files-guard/tsconfig.json
 ```
 
 The type check reads the declarations Claude Code writes to each plugin's `.claude-plugin/types` folder when a session loads the plugin from this folder.
+
+## Evals
+
+`plugins/frie-core/evals` holds one case for each of the five rules Brandon corrects most: no unrequested comments, American spelling, state-based tests, explicit absence, and docs as current state. Each case grades the file Claude writes with a regex, so the graders cost nothing, and the runs themselves use your plan's model usage. The cases write files, so grant the write tools:
+
+```
+claude plugin eval plugins/frie-core --allow-tools Write Edit
+```
+
+Each case runs three times with the plugin and three times without it, and the summary reports the difference. CI does not run the evals, because each run is a model call.
 
 ## Update
 

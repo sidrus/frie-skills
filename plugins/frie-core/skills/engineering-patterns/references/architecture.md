@@ -113,7 +113,7 @@ A switch is fine while every arm is trivial. As soon as one arm needs a dependen
 
 DRY is unconditional. Any duplication gets refactored, because the failure it prevents is a copy and paste bug. There is no rule of three and no exemption for two sites that happen to change for different reasons.
 
-It outranks the convenience of a stable wire shape. If removing the duplication means a response type gains a nested block and consumers have to adjust, that is the cost of the fix.
+Inside the code we deploy together, DRY outranks a stable wire shape. If removing the duplication means an internal response type gains a nested block and our own consumers adjust, that is the cost of the fix. A published contract, meaning a public API, a package, or a stored or wire format that code outside the repo reads, keeps its shape, so the duplication is removed behind it and the contract changes only through its own versioning.
 
 Extraction must never read worse than the duplication did. When it does, the parameter is wrong rather than the extraction. A boolean argument or a required `null` argument at a call site is an architectural signal that the method is doing two things or the type is wrong.
 

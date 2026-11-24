@@ -8,7 +8,7 @@
     {
       "name": "frie-core",
       "source": "./plugins/frie-core",
-      "description": "Brandon Frie's language-neutral engineering patterns and prose style, and a hook that flags British spellings.",
+      "description": "Brandon Frie's language-neutral engineering patterns and prose style, a hook that denies a code edit until engineering-patterns is loaded, and a hook that flags British spellings.",
       "category": "engineering"
     },
     {
