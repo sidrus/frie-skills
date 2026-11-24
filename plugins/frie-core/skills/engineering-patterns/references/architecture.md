@@ -66,6 +66,8 @@ The folder tree is the subsystem tree, so reading it alone shows every subsystem
 - **Every folder's name states what it is for**, either a subsystem (`Orders/`, `Authorization/`) or a feature inside one (`Placement/`). It is never named for a kind of type (`Models/`, `Extensions/`, `Helpers/`) or with a name that fits anything (`Infrastructure/`, `Common/`, `Utils/`), because those hide what the code does. The test is whether the folder has one responsibility its name states. A word that is also a kind of type doesn't fail it: a `Controls/` folder that is the app's control library passes, and a `Components/` folder that holds every component fails.
 - **An internal type lives beside its consumer.** When a second consumer in the same subsystem appears, the type moves outward only as far as the nearest folder both consumers share. A consumer in another subsystem puts the type in its owner's contract instead.
 
+These rules hold down to a UI project as a whole. Below that, the UI framework's reference sets the layout, because a UI's folders follow its navigation rather than ownership.
+
 ## Layer responsibilities
 
 Inside a subsystem, three layers each have one job:

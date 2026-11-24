@@ -18,22 +18,31 @@ Extract repeated markup into a component. If the same structure appears in two o
 
 ## Project layout
 
-The code layout outcomes in the `engineering-patterns` architecture reference apply, so the project root holds one folder per subsystem, mirroring the server's:
+The project as a whole is one subsystem under the `engineering-patterns` architecture reference. Inside it, folders follow the app's navigation:
 
 ```
-<Feature>/              page + feature-only components + view records + feature projections and parsers
-Controls/               the app's standard controls, such as buttons, labels, data grids, and dialogs, each with its own projections and options beside it
-Operations/             the cancellable component base and operation state for components that call a backend
+Features/
+  Components/           components and records that two or more features use; a group that shares one domain concept gets a subfolder for it
+  <Feature>/
+    <Page>.razor        one or more pages, each named for what it shows
+    Components/         components only this feature uses
+    Models/             view records only this feature uses
+    Services/           the feature's other C# code: projections, parsers, options, logging
+    <SubFeature>/       the same structure, for a page whose components no page above it uses
 Layout/                 app root and shell: App, Routes, layout, sidebar, user menu, reconnect modal
-Authorization/          current user and policy handlers
-<Backend>Api/           API clients and their options
-Browser/                IJSRuntime services
+Services/               code that no component lifecycle or browser call reaches
+  Authorization/        current user and policy handlers
+  <Backend>Api/         API clients and their options
 _Imports.razor          at the project root, so it covers every folder
 ```
 
+A feature creates `Components/`, `Models/`, or `Services/` only when it has something to put in it.
+
+A feature uses code from its own folder and from folders above it, never from a sibling feature or a feature below it. When a second feature needs a type, the type moves up to the nearest folder both features share, which for two top-level features is `Features/Components/`. Code that depends on a component's lifecycle or the browser, such as the cancellable component base, operation state, and `IJSRuntime` services, lives under `Features/` and moves up the same way.
+
 A backend in the same solution supplies its request and response types through its contract. `<Backend>Api/` defines its own only for a backend outside the solution.
 
-A control wraps a library component with the app's defaults and behavior. A page customizes a control's behavior or layout by composition, through its parameters and `RenderFragment` slots, and never by inheriting from it.
+A shared control in `Features/Components/` wraps a library component with the app's defaults and behavior. A page customizes a control's behavior or layout by composition, through its parameters and `RenderFragment` slots, and never by inheriting from it.
 
 ## Render mode
 
