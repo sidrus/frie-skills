@@ -1,4 +1,4 @@
-import type { Hook, Register } from 'claude-code'
+import type { Hook, On } from 'claude-code'
 import { DENY_REASON, isSecretPath, listFilePaths, reachesSecret } from './policy'
 
 type Engine = Parameters<Hook<'tool.call'>>[0]
@@ -13,7 +13,7 @@ async function landsOnSecret($: Engine, path: string): Promise<boolean> {
   return stat.realPath === undefined || isSecretPath(stat.realPath)
 }
 
-export const register: Register = on => {
+export function register(on: On) {
   on('tool.call', async ($, e, next) => {
     if (reachesSecret(e)) {
       return { deny: DENY_REASON }

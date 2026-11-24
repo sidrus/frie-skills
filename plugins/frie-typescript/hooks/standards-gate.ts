@@ -9,7 +9,7 @@ const EXEMPT_PATH = /^\/tmp\/|\/scratchpad\/|\/node_modules\/|\/dist\/|\/build\/
 const TYPESCRIPT_FILE = /\.[cm]?tsx?$/
 const TEST_PATH = /\/(tests?|__tests__)\/|\.(test|spec)\.[cm]?tsx?$/
 
-function toForwardSlashes(path: string): string {
+function normalizeSlashes(path: string): string {
   return path.replaceAll('\\', '/')
 }
 
@@ -36,12 +36,12 @@ function listFullReads(transcript: SessionMessage[]): string[] {
     .filter(use => use.tool === 'Read' && use.isError === undefined && use.input.offset === undefined && use.input.limit === undefined)
     .map(use => use.input.file_path)
     .filter(path => typeof path === 'string')
-    .map(toForwardSlashes)
+    .map(normalizeSlashes)
 }
 
 export function registerStandardsGate(on: On) {
   on('tool.call', { tool: ['Edit', 'Write'] }, async ($, e, next) => {
-    const file = toForwardSlashes(e.file_path)
+    const file = normalizeSlashes(e.file_path)
     const required = listRequiredReferences(file)
     if (required.length === 0) {
       return next(e)

@@ -3,7 +3,7 @@ import { describe, expect, test, type Engine } from 'claude-code/testing'
 
 type Call = ToolCallArgs & AgentLoop
 type Outcome = 'allow' | 'deny'
-type Read = { file_path: string; agentId?: string; limit?: number; isError?: true }
+type Read = { readonly file_path: string; readonly agentId?: string; readonly limit?: number; readonly isError?: true }
 
 const RAN = 'ran'
 const HELPER = 'helper'
@@ -14,8 +14,10 @@ const REACT = `${REFERENCES}/react.md`
 const TESTING = '/elsewhere/frie-core/skills/engineering-patterns/references/testing.md'
 const WINDOWS_TYPESCRIPT = 'C:\\Users\\u\\.claude\\plugins\\frie-typescript\\skills\\standards\\references\\typescript.md'
 const SOURCE = '/repo/src/orders/ship.ts'
+const COMPONENT = '/repo/src/orders/ShipButton.tsx'
+const TEST_SOURCE = '/repo/tests/orders/ship.test.ts'
 
-function buildTranscript(reads: Read[]): SessionMessage[] {
+function buildTranscript(reads: readonly Read[]): SessionMessage[] {
   const toolUses = reads.map(({ agentId, isError, ...input }) => ({
     tool_use_id: crypto.randomUUID(),
     tool: 'Read',
@@ -26,12 +28,12 @@ function buildTranscript(reads: Read[]): SessionMessage[] {
   return [{ role: 'assistant', text: '', toolUses }]
 }
 
-function arrange(on: On, reads: Read[]) {
+function arrange(on: On, reads: readonly Read[]) {
   on('tool.call', () => ({ result: RAN }))
   on('session.messages', (_, e) => ({ value: buildTranscript(reads.filter(read => read.agentId === e.agentId)) }))
 }
 
-function readsOf(paths: string[]): Read[] {
+function buildReads(paths: readonly string[]): Read[] {
   return paths.map(path => ({ file_path: path }))
 }
 
@@ -40,141 +42,141 @@ async function decide($: Engine, call: Call): Promise<Outcome> {
   return answer.result === RAN ? 'allow' : 'deny'
 }
 
-function editOf(path: string): Call {
+function buildEdit(path: string): Call {
   return { tool: 'Edit', file_path: path, old_string: 'a', new_string: 'b' }
 }
 
 describe('standards gate', () => {
-  test('TypeScript edit is denied when typescript.md was not read', async ($, on) => {
+  test('denies a TypeScript edit when typescript.md was not read', async ($, on) => {
     arrange(on, [])
 
-    expect(await decide($, editOf(SOURCE))).toBe('deny')
+    expect(await decide($, buildEdit(SOURCE))).toBe('deny')
   })
 
-  test('TypeScript edit is allowed when typescript.md was read in full', async ($, on) => {
-    arrange(on, readsOf([TYPESCRIPT]))
+  test('allows a TypeScript edit when typescript.md was read in full', async ($, on) => {
+    arrange(on, buildReads([TYPESCRIPT]))
 
-    expect(await decide($, editOf(SOURCE))).toBe('allow')
+    expect(await decide($, buildEdit(SOURCE))).toBe('allow')
   })
 
-  test('TypeScript edit is denied when typescript.md was read with a limit', async ($, on) => {
+  test('denies a TypeScript edit when typescript.md was read with a limit', async ($, on) => {
     arrange(on, [{ file_path: TYPESCRIPT, limit: 40 }])
 
-    expect(await decide($, editOf(SOURCE))).toBe('deny')
+    expect(await decide($, buildEdit(SOURCE))).toBe('deny')
   })
 
-  test('TypeScript edit is denied when the typescript.md read failed', async ($, on) => {
+  test('denies a TypeScript edit when the typescript.md read failed', async ($, on) => {
     arrange(on, [{ file_path: TYPESCRIPT, isError: true }])
 
-    expect(await decide($, editOf(SOURCE))).toBe('deny')
+    expect(await decide($, buildEdit(SOURCE))).toBe('deny')
   })
 
-  test('TypeScript write is denied when typescript.md was not read', async ($, on) => {
+  test('denies a TypeScript write when typescript.md was not read', async ($, on) => {
     arrange(on, [])
 
     expect(await decide($, { tool: 'Write', file_path: SOURCE, content: '' })).toBe('deny')
   })
 
-  test('ES module TypeScript edit is denied when typescript.md was not read', async ($, on) => {
+  test('denies an ES module TypeScript edit when typescript.md was not read', async ($, on) => {
     arrange(on, [])
 
-    expect(await decide($, editOf('/repo/scripts/release.mts'))).toBe('deny')
+    expect(await decide($, buildEdit('/repo/scripts/release.mts'))).toBe('deny')
   })
 
-  test('TSX edit is denied when react.md was not read', async ($, on) => {
-    arrange(on, readsOf([TYPESCRIPT]))
+  test('denies a TSX edit when react.md was not read', async ($, on) => {
+    arrange(on, buildReads([TYPESCRIPT]))
 
-    expect(await decide($, editOf('/repo/src/orders/ShipButton.tsx'))).toBe('deny')
+    expect(await decide($, buildEdit(COMPONENT))).toBe('deny')
   })
 
-  test('TSX edit is allowed when typescript.md and react.md were read', async ($, on) => {
-    arrange(on, readsOf([TYPESCRIPT, REACT]))
+  test('allows a TSX edit when typescript.md and react.md were read', async ($, on) => {
+    arrange(on, buildReads([TYPESCRIPT, REACT]))
 
-    expect(await decide($, editOf('/repo/src/orders/ShipButton.tsx'))).toBe('allow')
+    expect(await decide($, buildEdit(COMPONENT))).toBe('allow')
   })
 
-  test('TypeScript test edit is denied when typescript-testing.md was not read', async ($, on) => {
-    arrange(on, readsOf([TYPESCRIPT, TESTING]))
+  test('denies a TypeScript test edit when typescript-testing.md was not read', async ($, on) => {
+    arrange(on, buildReads([TYPESCRIPT, TESTING]))
 
-    expect(await decide($, editOf('/repo/tests/orders/ship.test.ts'))).toBe('deny')
+    expect(await decide($, buildEdit(TEST_SOURCE))).toBe('deny')
   })
 
-  test('TypeScript test edit is denied when testing.md was not read', async ($, on) => {
-    arrange(on, readsOf([TYPESCRIPT, TYPESCRIPT_TESTING]))
+  test('denies a TypeScript test edit when testing.md was not read', async ($, on) => {
+    arrange(on, buildReads([TYPESCRIPT, TYPESCRIPT_TESTING]))
 
-    expect(await decide($, editOf('/repo/tests/orders/ship.test.ts'))).toBe('deny')
+    expect(await decide($, buildEdit(TEST_SOURCE))).toBe('deny')
   })
 
-  test('colocated spec edit is denied when the test references were not read', async ($, on) => {
-    arrange(on, readsOf([TYPESCRIPT]))
+  test('denies a colocated spec edit when the test references were not read', async ($, on) => {
+    arrange(on, buildReads([TYPESCRIPT]))
 
-    expect(await decide($, editOf('/repo/src/orders/ship.spec.ts'))).toBe('deny')
+    expect(await decide($, buildEdit('/repo/src/orders/ship.spec.ts'))).toBe('deny')
   })
 
-  test('test support edit is denied when the test references were not read', async ($, on) => {
-    arrange(on, readsOf([TYPESCRIPT]))
+  test('denies a test support edit when the test references were not read', async ($, on) => {
+    arrange(on, buildReads([TYPESCRIPT]))
 
-    expect(await decide($, editOf('/repo/tests/support/buildOrder.ts'))).toBe('deny')
+    expect(await decide($, buildEdit('/repo/tests/support/buildOrder.ts'))).toBe('deny')
   })
 
-  test('TypeScript test edit is allowed when all three references were read', async ($, on) => {
-    arrange(on, readsOf([TYPESCRIPT, TYPESCRIPT_TESTING, TESTING]))
+  test('allows a TypeScript test edit when every reference was read', async ($, on) => {
+    arrange(on, buildReads([TYPESCRIPT, TYPESCRIPT_TESTING, TESTING]))
 
-    expect(await decide($, editOf('/repo/tests/orders/ship.test.ts'))).toBe('allow')
+    expect(await decide($, buildEdit(TEST_SOURCE))).toBe('allow')
   })
 
-  test('TSX test edit is allowed when all four references were read', async ($, on) => {
-    arrange(on, readsOf([TYPESCRIPT, REACT, TYPESCRIPT_TESTING, TESTING]))
+  test('allows a TSX test edit when every reference was read', async ($, on) => {
+    arrange(on, buildReads([TYPESCRIPT, REACT, TYPESCRIPT_TESTING, TESTING]))
 
-    expect(await decide($, editOf('/repo/tests/orders/ShipButton.test.tsx'))).toBe('allow')
+    expect(await decide($, buildEdit('/repo/tests/orders/ShipButton.test.tsx'))).toBe('allow')
   })
 
-  test('JavaScript edit is allowed when nothing was read', async ($, on) => {
+  test('allows a JavaScript edit when nothing was read', async ($, on) => {
     arrange(on, [])
 
-    expect(await decide($, editOf('/repo/src/legacy.js'))).toBe('allow')
+    expect(await decide($, buildEdit('/repo/src/legacy.js'))).toBe('allow')
   })
 
-  test('TypeScript edit is allowed when the file is under node_modules', async ($, on) => {
+  test('allows a TypeScript edit when the file is under node_modules', async ($, on) => {
     arrange(on, [])
 
-    expect(await decide($, editOf('/repo/node_modules/zod/index.d.ts'))).toBe('allow')
+    expect(await decide($, buildEdit('/repo/node_modules/zod/index.d.ts'))).toBe('allow')
   })
 
-  test('TypeScript edit is allowed when the file is under dist', async ($, on) => {
+  test('allows a TypeScript edit when the file is under dist', async ($, on) => {
     arrange(on, [])
 
-    expect(await decide($, editOf('/repo/dist/orders/ship.d.ts'))).toBe('allow')
+    expect(await decide($, buildEdit('/repo/dist/orders/ship.d.ts'))).toBe('allow')
   })
 
-  test('TypeScript edit is allowed when the file is in generated plugin types', async ($, on) => {
+  test('allows a TypeScript edit when the file is in generated plugin types', async ($, on) => {
     arrange(on, [])
 
-    expect(await decide($, editOf('/repo/plugins/frie-core/.claude-plugin/types/claude-code/index.d.ts'))).toBe('allow')
+    expect(await decide($, buildEdit('/repo/plugins/frie-core/.claude-plugin/types/claude-code/index.d.ts'))).toBe('allow')
   })
 
-  test('TypeScript edit is allowed when a Windows-path typescript.md was read in full', async ($, on) => {
-    arrange(on, readsOf([WINDOWS_TYPESCRIPT]))
+  test('allows a TypeScript edit when a Windows-path typescript.md was read in full', async ($, on) => {
+    arrange(on, buildReads([WINDOWS_TYPESCRIPT]))
 
-    expect(await decide($, editOf('C:\\repo\\src\\orders\\ship.ts'))).toBe('allow')
+    expect(await decide($, buildEdit('C:\\repo\\src\\orders\\ship.ts'))).toBe('allow')
   })
 
-  test('TypeScript edit is denied when typescript.md was read by another agent', async ($, on) => {
+  test('denies a TypeScript edit when typescript.md was read by another agent', async ($, on) => {
     arrange(on, [{ file_path: TYPESCRIPT, agentId: HELPER }])
 
-    expect(await decide($, editOf(SOURCE))).toBe('deny')
+    expect(await decide($, buildEdit(SOURCE))).toBe('deny')
   })
 
-  test('TypeScript edit is allowed when the subagent read typescript.md itself', async ($, on) => {
+  test('allows a TypeScript edit when the subagent read typescript.md itself', async ($, on) => {
     arrange(on, [{ file_path: TYPESCRIPT, agentId: HELPER }])
 
-    expect(await decide($, { ...editOf(SOURCE), agentId: HELPER })).toBe('allow')
+    expect(await decide($, { ...buildEdit(SOURCE), agentId: HELPER })).toBe('allow')
   })
 
-  test('TypeScript edit is allowed when the agent transcript cannot be read', async ($, on) => {
+  test('allows a TypeScript edit when the agent transcript cannot be read', async ($, on) => {
     on('tool.call', () => ({ result: RAN }))
     on('session.messages', () => ({ deny: 'unreadable' }))
 
-    expect(await decide($, editOf(SOURCE))).toBe('allow')
+    expect(await decide($, buildEdit(SOURCE))).toBe('allow')
   })
 })

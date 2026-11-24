@@ -5,6 +5,13 @@ description: Language rules for Python, layered on engineering-patterns. Use bef
 
 # Python Standards
 
-**Invoke `frie-core:engineering-patterns` first.** It holds every rule that is the same in all languages: precedence, naming, signatures, absence, control flow, comments, design, testing, suppressions, and the done checklist. This skill adds only how Python expresses those rules in its own idioms, and never restates them.
+**Invoke `frie-core:engineering-patterns` first.** It holds every rule that is the same in all languages. This skill adds only how Python expresses those rules, and never restates them.
 
-Read `references/python.md` **before** the first edit of a `*.py` file, not as a check afterward, and read it for test files too, since it holds the test conventions.
+## Read the reference for what you touch
+
+| Touching | Read |
+|---|---|
+| `*.py` | `references/python.md` |
+| a test, meaning a `test_*.py`, `*_test.py`, or `conftest.py` file or any file under a `test` or `tests` folder | `references/python.md`, `references/python-testing.md`, and the `engineering-patterns` testing reference |
+
+Read the reference **before** the first edit, not as a check afterward.
