@@ -40,8 +40,8 @@ Name an operation for what it means in the domain, such as `BlockHost` and `Unbl
 
 ## Signatures
 
-- Two parameters at most, plus whatever trailing cancellation parameter the language uses.
-- When a signature needs more, fold the extras into a type that already exists. A new record whose only purpose is to group arguments is a last resort.
+- Three parameters at most, plus whatever trailing cancellation parameter the language uses. Fewer is better when the extra parameter would only pass through.
+- When a signature needs more, fold the extras into a type that already exists, or into a new record when the grouped values form a concept the domain already uses, such as a date range or an address. A record that exists only to bundle unrelated arguments is not a fix.
 - A value that is constant per call site rather than per call is not a parameter. Hoist each combination to a named constant and pass that.
 - No unused parameters. That includes a cancellation token the library underneath gives no way to pass on, and a parameter kept only because a sibling method takes one.
 - These limits govern signatures you design. Where a framework dictates the shape, such as a route handler, an overridden framework method, an event handler, a generated partial, or a delegate matching a library's signature, they do not apply.

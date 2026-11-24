@@ -16,7 +16,6 @@ description: Prose style for documentation, code comments, XML docs, Javadoc, an
 - Write flowing grammatical sentences in the active voice. Em-dash asides and colon-chained clauses read as AI-speak, so restructure them into full sentences rather than choppy fragments. Term-definition bullets and tables are fine.
 - Keep paragraphs to three or four concise sentences.
 - Use literal language. No metaphors, idioms, or other figurative speech.
-- Never end a sentence on a preposition or particle.
 - Don't use "carries" or "names" as verbs. Pick the specific verb, such as contains, holds, lists, or identifies.
 
 ## Voice
