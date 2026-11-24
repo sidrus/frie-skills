@@ -1,7 +1,7 @@
 {
   "name": "frie-neoforge",
-  "version": "1.0.0",
-  "description": "Brandon Frie's NeoForge Minecraft mod conventions, layered on his Java standards.",
+  "version": "1.1.0",
+  "description": "Brandon Frie's NeoForge Minecraft mod conventions, layered on his Java standards, and a hook that denies a mod edit until the references for its NeoForge version are read.",
   "author": {
     "name": "Brandon Frie"
   },

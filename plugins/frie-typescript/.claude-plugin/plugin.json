@@ -1,0 +1,15 @@
+{
+  "name": "frie-typescript",
+  "version": "1.0.0",
+  "description": "Brandon Frie's TypeScript and React standards, and a hook that denies a TypeScript edit until its references are read.",
+  "author": {
+    "name": "Brandon Frie"
+  },
+  "repository": "https://github.com/sidrus/frie-skills",
+  "license": "MIT",
+  "engines": {
+    "claude-code": ">=2.1.330"
+  },
+  "dependencies": ["frie-core"],
+  "skills": ["./skills/standards"]
+}

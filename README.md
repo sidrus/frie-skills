@@ -9,8 +9,9 @@ Brandon Frie's Claude Code marketplace, `frie`. Each language or framework is it
 | `frie-core` | `engineering-patterns`: language-neutral rules for design, architecture, testing, comments, and suppressions. `writing-style-guide`: prose style for docs, code comments, commit messages, and chat | `spelling.ts` adds a reminder to the context after an edit that adds a likely British spelling, and never blocks | |
 | `frie-dotnet` | `standards`: how C#, .NET, and Blazor express the core rules | `standards-gate.ts` denies an Edit or Write to a `.cs`, `.razor`, or `.razor.css` file until the same agent has read the matching references in full since its last compaction or `/clear` | `frie-core` |
 | `frie-python` | `standards`: how Python expresses the core rules | `standards-gate.ts` does the same for a `.py` file | `frie-core` |
-| `frie-java` | `standards`: how Java expresses the core rules | | `frie-core` |
-| `frie-neoforge` | `standards`: NeoForge Minecraft mod conventions | | `frie-java` |
+| `frie-java` | `standards`: how Java expresses the core rules | `standards-gate.ts` does the same for a `.java` file or a Gradle build or settings file | `frie-core` |
+| `frie-neoforge` | `standards`: NeoForge Minecraft mod conventions | `standards-gate.ts` does the same for a Java, JSON, TOML, or Gradle file in a project whose `gradle.properties` sets `neo_version`, and requires the reference for that version | `frie-java` |
+| `frie-typescript` | `standards`: how TypeScript and React express the core rules | `standards-gate.ts` does the same for a `.ts`, `.mts`, `.cts`, or `.tsx` file | `frie-core` |
 | `secret-files-guard` | | A tool-call hook that denies a tool call that reaches a secrets file. It denies the call when the hook fails. | |
 
 The code skills compose by layer, and each states a rule once. `frie-neoforge:standards` invokes `frie-java:standards`, which invokes `frie-core:engineering-patterns`. A new language or framework is a new plugin whose `standards` skill invokes the layer under it and lists that layer's plugin in `dependencies`. Installing a plugin installs its dependencies.
@@ -74,10 +75,16 @@ Install the plugin for each language or framework the machine works in. Skills i
 claude plugin test plugins/frie-core
 claude plugin test plugins/frie-dotnet
 claude plugin test plugins/frie-python
+claude plugin test plugins/frie-java
+claude plugin test plugins/frie-neoforge
+claude plugin test plugins/frie-typescript
 claude plugin test plugins/secret-files-guard
 npx -y -p typescript@5.9.3 tsc -p plugins/frie-core/tsconfig.json
 npx -y -p typescript@5.9.3 tsc -p plugins/frie-dotnet/tsconfig.json
 npx -y -p typescript@5.9.3 tsc -p plugins/frie-python/tsconfig.json
+npx -y -p typescript@5.9.3 tsc -p plugins/frie-java/tsconfig.json
+npx -y -p typescript@5.9.3 tsc -p plugins/frie-neoforge/tsconfig.json
+npx -y -p typescript@5.9.3 tsc -p plugins/frie-typescript/tsconfig.json
 npx -y -p typescript@5.9.3 tsc -p plugins/secret-files-guard/tsconfig.json
 ```
 

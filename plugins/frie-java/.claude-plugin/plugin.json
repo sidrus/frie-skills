@@ -1,7 +1,7 @@
 {
   "name": "frie-java",
-  "version": "1.0.0",
-  "description": "Brandon Frie's Java standards.",
+  "version": "1.1.0",
+  "description": "Brandon Frie's Java standards, and a hook that denies a Java or Gradle edit until its references are read.",
   "author": {
     "name": "Brandon Frie"
   },
