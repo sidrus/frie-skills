@@ -1,6 +1,6 @@
 {
   "name": "secret-files-guard",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Denies tool calls that reach a secrets file (.env, *.local.json, credential stores, private keys) through a path or a glob.",
   "author": {
     "name": "Brandon Frie"

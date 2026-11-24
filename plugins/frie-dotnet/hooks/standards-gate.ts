@@ -1,36 +1,39 @@
 import type { On, SessionMessage } from 'claude-code'
 
+type SuffixReferences = { readonly suffix: string; readonly references: readonly string[] }
+
 const STANDARDS = 'standards/references'
 const CSHARP = `${STANDARDS}/csharp.md`
+const CSHARP_TESTING = `${STANDARDS}/csharp-testing.md`
 const FORMATTING = `${STANDARDS}/formatting.md`
 const BLAZOR = `${STANDARDS}/blazor.md`
 const TESTING = 'engineering-patterns/references/testing.md'
 const EXEMPT_PATH = /^\/tmp\/|\/scratchpad\/|\/obj\/|\/bin\/|\/node_modules\//
 const TEST_PATH = /\/[Tt]ests?\/|\/[^/]*Tests?(\/|\.(cs|razor)$)/
-const REFERENCES_BY_SUFFIX: [string, string[]][] = [
-  ['.razor.cs', [BLAZOR, CSHARP, FORMATTING]],
-  ['.razor.css', [BLAZOR]],
-  ['.razor', [BLAZOR, CSHARP, FORMATTING]],
-  ['.cs', [CSHARP, FORMATTING]],
+const REFERENCES_BY_SUFFIX: readonly SuffixReferences[] = [
+  { suffix: '.razor.cs', references: [BLAZOR, CSHARP, FORMATTING] },
+  { suffix: '.razor.css', references: [BLAZOR] },
+  { suffix: '.razor', references: [BLAZOR, CSHARP, FORMATTING] },
+  { suffix: '.cs', references: [CSHARP, FORMATTING] },
 ]
 
-function toForwardSlashes(path: string): string {
+function normalizeSlashes(path: string): string {
   return path.replaceAll('\\', '/')
 }
 
-function listRequiredReferences(file: string): string[] {
-  const references = EXEMPT_PATH.test(file) ? undefined : REFERENCES_BY_SUFFIX.find(([suffix]) => file.endsWith(suffix))?.[1]
+function listRequiredReferences(file: string): readonly string[] {
+  const references = EXEMPT_PATH.test(file) ? undefined : REFERENCES_BY_SUFFIX.find(({ suffix }) => file.endsWith(suffix))?.references
   if (references === undefined) {
     return []
   }
-  return TEST_PATH.test(file) ? [...references, TESTING] : references
+  return TEST_PATH.test(file) ? [...references, CSHARP_TESTING, TESTING] : references
 }
 
 function locateReference(reference: string, root: string): string {
   return reference === TESTING ? `${TESTING} in the frie-core plugin` : `${root}/skills/${reference}`
 }
 
-function writeDenial(missing: string[], file: string): string {
+function writeDenial(missing: readonly string[], file: string): string {
   const paths = missing.join(', ')
   const name = file.split('/').pop()
   return `BLOCKED by the standards gate. Brandon requires the reference for what you touch to be read BEFORE the first edit, not as a check afterward. Not read in full yet in this context window: ${paths}. Read each one with the Read tool and no offset or limit, then repeat this edit. If ${name} crosses a repository, service, endpoint, or mapping boundary, read dotnet-layering.md as well. Reading them is the entire point, so do not route around this by writing the file through Bash.`
@@ -42,12 +45,12 @@ function listFullReads(transcript: SessionMessage[]): string[] {
     .filter(use => use.tool === 'Read' && use.isError === undefined && use.input.offset === undefined && use.input.limit === undefined)
     .map(use => use.input.file_path)
     .filter(path => typeof path === 'string')
-    .map(toForwardSlashes)
+    .map(normalizeSlashes)
 }
 
 export function registerStandardsGate(on: On) {
   on('tool.call', { tool: ['Edit', 'Write'] }, async ($, e, next) => {
-    const file = toForwardSlashes(e.file_path)
+    const file = normalizeSlashes(e.file_path)
     const required = listRequiredReferences(file)
     if (required.length === 0) {
       return next(e)

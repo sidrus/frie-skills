@@ -72,7 +72,7 @@ function listTargets(call: ToolInput): string[] {
   }
 }
 
-function toGlobPattern(glob: string): RegExp | undefined {
+function buildGlobPattern(glob: string): RegExp | undefined {
   const source = glob
     .replace(GLOB_LITERAL, '\\$&')
     .replace(/\*/g, '[^/]*')
@@ -87,7 +87,7 @@ function toGlobPattern(glob: string): RegExp | undefined {
 
 function isRiskyGlob(token: string): boolean {
   const base = token.split('/').pop() ?? ''
-  const pattern = GLOB_CHARACTER.test(base) ? toGlobPattern(base) : undefined
+  const pattern = GLOB_CHARACTER.test(base) ? buildGlobPattern(base) : undefined
   if (pattern === undefined) {
     return false
   }

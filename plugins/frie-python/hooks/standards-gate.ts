@@ -2,26 +2,27 @@ import type { On, SessionMessage } from 'claude-code'
 
 const STANDARDS = 'standards/references'
 const PYTHON = `${STANDARDS}/python.md`
+const PYTHON_TESTING = `${STANDARDS}/python-testing.md`
 const TESTING = 'engineering-patterns/references/testing.md'
 const EXEMPT_PATH = /^\/tmp\/|\/scratchpad\/|\/\.venv\/|\/bin\/|\/node_modules\//
 const TEST_PATH = /\/[Tt]ests?\/|\/test_[^/]*\.py$|\/[^/]*_test\.py$|\/conftest\.py$/
 
-function toForwardSlashes(path: string): string {
+function normalizeSlashes(path: string): string {
   return path.replaceAll('\\', '/')
 }
 
-function listRequiredReferences(file: string): string[] {
+function listRequiredReferences(file: string): readonly string[] {
   if (EXEMPT_PATH.test(file) || !file.endsWith('.py')) {
     return []
   }
-  return TEST_PATH.test(file) ? [PYTHON, TESTING] : [PYTHON]
+  return TEST_PATH.test(file) ? [PYTHON, PYTHON_TESTING, TESTING] : [PYTHON]
 }
 
 function locateReference(reference: string, root: string): string {
   return reference === TESTING ? `${TESTING} in the frie-core plugin` : `${root}/skills/${reference}`
 }
 
-function writeDenial(missing: string[]): string {
+function writeDenial(missing: readonly string[]): string {
   const paths = missing.join(', ')
   return `BLOCKED by the standards gate. Brandon requires the reference for what you touch to be read BEFORE the first edit, not as a check afterward. Not read in full yet in this context window: ${paths}. Read each one with the Read tool and no offset or limit, then repeat this edit. Reading them is the entire point, so do not route around this by writing the file through Bash.`
 }
@@ -32,12 +33,12 @@ function listFullReads(transcript: SessionMessage[]): string[] {
     .filter(use => use.tool === 'Read' && use.isError === undefined && use.input.offset === undefined && use.input.limit === undefined)
     .map(use => use.input.file_path)
     .filter(path => typeof path === 'string')
-    .map(toForwardSlashes)
+    .map(normalizeSlashes)
 }
 
 export function registerStandardsGate(on: On) {
   on('tool.call', { tool: ['Edit', 'Write'] }, async ($, e, next) => {
-    const file = toForwardSlashes(e.file_path)
+    const file = normalizeSlashes(e.file_path)
     const required = listRequiredReferences(file)
     if (required.length === 0) {
       return next(e)

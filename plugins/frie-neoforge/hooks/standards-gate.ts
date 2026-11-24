@@ -11,7 +11,7 @@ const EXEMPT_PATH = /^\/tmp\/|\/scratchpad\/|\/build\/|\/runs?\/|\/\.gradle\/|\/
 const MOD_FILE = /\.(java|json|toml|gradle|kts)$/
 const NEO_VERSION = /^\s*neo_version\s*=\s*(\d+)\.(\d+)/m
 
-function toForwardSlashes(path: string): string {
+function normalizeSlashes(path: string): string {
   return path.replaceAll('\\', '/')
 }
 
@@ -33,8 +33,8 @@ function parseNeoVersion(properties: string): NeoVersion | undefined {
 
 async function findNeoVersion($: Engine, file: string): Promise<NeoVersion | undefined> {
   for (const folder of listAncestorFolders(file)) {
-    const properties = await $.fs.read(`${folder}/gradle.properties`).catch(() => undefined)
-    const version = typeof properties === 'string' ? parseNeoVersion(properties) : undefined
+    const path = `${folder}/gradle.properties`
+    const version = (await $.fs.exists(path)) ? parseNeoVersion(await $.fs.read(path)) : undefined
     if (version !== undefined) {
       return version
     }
@@ -63,12 +63,12 @@ function listFullReads(transcript: SessionMessage[]): string[] {
     .filter(use => use.tool === 'Read' && use.isError === undefined && use.input.offset === undefined && use.input.limit === undefined)
     .map(use => use.input.file_path)
     .filter(path => typeof path === 'string')
-    .map(toForwardSlashes)
+    .map(normalizeSlashes)
 }
 
 export function registerStandardsGate(on: On) {
   on('tool.call', { tool: ['Edit', 'Write'] }, async ($, e, next) => {
-    const file = toForwardSlashes(e.file_path)
+    const file = normalizeSlashes(e.file_path)
     if (EXEMPT_PATH.test(file) || !MOD_FILE.test(file)) {
       return next(e)
     }
