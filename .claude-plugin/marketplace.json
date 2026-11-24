@@ -26,13 +26,19 @@
     {
       "name": "frie-java",
       "source": "./plugins/frie-java",
-      "description": "Brandon Frie's Java standards.",
+      "description": "Brandon Frie's Java standards, and a hook that denies a Java or Gradle edit until its references are read.",
       "category": "engineering"
     },
     {
       "name": "frie-neoforge",
       "source": "./plugins/frie-neoforge",
-      "description": "Brandon Frie's NeoForge Minecraft mod conventions, layered on his Java standards.",
+      "description": "Brandon Frie's NeoForge Minecraft mod conventions, layered on his Java standards, and a hook that denies a mod edit until the references for its NeoForge version are read.",
+      "category": "engineering"
+    },
+    {
+      "name": "frie-typescript",
+      "source": "./plugins/frie-typescript",
+      "description": "Brandon Frie's TypeScript and React standards, and a hook that denies a TypeScript edit until its references are read.",
       "category": "engineering"
     },
     {

@@ -1,6 +1,6 @@
 # NeoForge 21.4 and later
 
-Applies when `neo_version` is 21.4 or later, which covers Minecraft 1.21.4 onward, including the 26.x releases. This file gives the APIs for the rules in `SKILL.md`, marking each one introduced after 21.4 with its version. These APIs keep changing between releases, so the docs page for the repo's exact version on `docs.neoforged.net` takes precedence over this file wherever the two differ.
+Applies when `neo_version` is 21.4 or later, which covers Minecraft 1.21.4 onward, including the 26.x releases. Each API introduced after 21.4 is marked with its version. These APIs keep changing between releases, so the docs page for the repo's exact version on `docs.neoforged.net` takes precedence over this file wherever the two differ.
 
 ## Events
 
@@ -22,4 +22,4 @@ Block and item properties hold the object's registry ID. Blocks register through
 ## GameTests
 
 - On 21.4, GameTests use the annotations described in `neoforge-21.1.md`.
-- From 21.5, a GameTest has three parts. The test function is registered through a `DeferredRegister` on `BuiltInRegistries.TEST_FUNCTION`. The test instance and its environment are datapack entries in `Registries.TEST_INSTANCE` and `Registries.TEST_ENVIRONMENT`, generated through the `RegistrySetBuilder`. The test instance's `ResourceKey` path is the snake case name from `SKILL.md`.
+- From 21.5, a GameTest has three parts. The test function is registered through a `DeferredRegister` on `BuiltInRegistries.TEST_FUNCTION`. The test instance and its environment are datapack entries in `Registries.TEST_INSTANCE` and `Registries.TEST_ENVIRONMENT`, generated through the `RegistrySetBuilder`. The test instance's `ResourceKey` path is the snake case name from `neoforge.md`.
