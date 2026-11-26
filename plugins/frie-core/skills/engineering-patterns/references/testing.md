@@ -99,7 +99,7 @@ An integration test runs the code against the real thing a unit test fakes. Inte
 
 ## Fixtures
 
-Fixtures stay byte-faithful. Commit the real artifact as received and decode it at read time with its real encoding. A Windows-1252 file decodes as CP1252, never as Latin-1, which mangles 0x80 to 0x9F.
+Fixtures stay byte-faithful. Commit the real artifact as received and decode it at read time with its real encoding. A Windows-1252 file decodes as CP1252, never as ISO-8859-1, which mangles 0x80 to 0x9F.
 
 - A fixture file is marked binary for version control, so no tool rewrites its bytes.
 - An artifact that holds personal data or secrets is never committed as received. Ask for a scrubbed capture.
