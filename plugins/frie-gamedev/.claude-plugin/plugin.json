@@ -1,6 +1,6 @@
 {
   "name": "frie-gamedev",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Brandon Frie's practices for games and mods: simulation ticks, determinism, engine entry points, authority, and engine-hosted testing, layered on his engineering patterns, and a hook that denies a script edit in a Godot project until the skill is loaded.",
   "author": {
     "name": "Brandon Frie"
