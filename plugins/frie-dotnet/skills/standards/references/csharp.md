@@ -16,7 +16,6 @@
 ## File and member layout
 
 - One type per file.
-- Types that bind to `IOptions` are records.
 - Expression-bodied members put `=>` at the end of the signature line, the conventional trailing placement.
 - Private `static readonly` fields are `_camelCase`.
 - Enum members are separated by a blank line.
@@ -31,26 +30,13 @@
 - Return a named record, never a tuple, private helpers included.
 - Resolve a name collision by renaming the type, never with a `using` alias.
 
+## Contracts
+
+A subsystem that is its own project makes its contract `public` and everything else `internal`. Inside one project, both are `internal`.
+
 ## Doc comments
 
 XML docs go on a subsystem's contract whatever its visibility, because a subsystem that is a folder has an `internal` contract. Nothing else gets them.
-
-## Logging
-
-Every log call goes through `[LoggerMessage]` source generation, as `public static partial void X(this ILogger logger, ...)` extension methods in one `*Log.cs` static partial class per feature.
-
-This is CA1848 **(tooling)** where the repo sets `dotnet_diagnostic.CA1848.severity = warning`. CA rules run during build with no extra property or package, so a direct `logger.LogInformation(...)` call fails the build rather than waiting for review.
-
-A catch that expects its exception logs through the feature's `*Log.cs` extensions.
-
-## Observability
-
-Serilog is the logging framework. It is registered as the `ILogger` provider, so the `[LoggerMessage]` calls flow through it, and it exports to OpenTelemetry through `Serilog.Sinks.OpenTelemetry`. `frie-enterprise:standards` decides what must be instrumented and what gets a metric.
-
-## HTTP
-
-- Never `new HttpClient(...)`. Use `IHttpClientFactory` or a typed `AddHttpClient<T>` registration.
-- POST endpoints take a JSON body, not query-string flags.
 
 ## Time, resources, and exceptions
 
@@ -80,19 +66,6 @@ The ruled-out mechanisms are `#pragma`, `[SuppressMessage]`, and csproj `<NoWarn
 
 Match these shapes rather than re-deriving them from the rules above.
 
-Logging, one `*Log.cs` per feature. This is the one place the `this` parameter style is correct, because the source generator requires it:
-
-```csharp
-internal static partial class OrderLog
-{
-    [LoggerMessage(Level = LogLevel.Information, Message = "Order {OrderId} shipped with {Count} lines")]
-    public static partial void OrderShipped(this ILogger logger, long orderId, int count);
-
-    [LoggerMessage(Level = LogLevel.Trace, Message = "Order polling loop canceled during shutdown")]
-    public static partial void LoopCanceled(this ILogger logger);
-}
-```
-
 A domain record with non-null collections initialized to `[]` and a hoisted constant array:
 
 ```csharp
@@ -119,11 +92,13 @@ if (order.ShippingAddress is null)
 var carrier = order.Carrier?.Name ?? string.Empty;
 ```
 
-A catch that expects the exception still logs:
+When `Orders` is its own project, a contract operation is a `public` interface over `public` records, implemented by an `internal` service:
 
 ```csharp
-catch (OperationCanceledException)
+/// <summary>Reads orders on behalf of other subsystems.</summary>
+public interface IOrderLookup
 {
-    logger.LoopCanceled();
+    /// <summary>Finds an order's summary, or returns null when no order has the ID.</summary>
+    Task<OrderSummary?> FindAsync(long id, CancellationToken cancellationToken);
 }
 ```

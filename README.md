@@ -8,7 +8,8 @@ Brandon Frie's Claude Code marketplace, `frie`. Each language, domain, or framew
 |---|---|---|---|
 | `frie-core` | `engineering-patterns`: language-neutral rules for design, architecture, testing, comments, and suppressions. `writing-style-guide`: prose style for docs, code comments, commit messages, and chat | `engineering-gate.ts` denies an Edit or Write to a source code file until the same agent has invoked `engineering-patterns` since its last compaction or `/clear`. `spelling.ts` adds a reminder to the context after an edit that adds a likely British spelling, and never blocks | |
 | `frie-enterprise` | `standards`: the domain practices for services and business applications, covering layering, data access, performance, observability, and integration testing | | `frie-core` |
-| `frie-dotnet` | `standards`: how C#, .NET, and Blazor express the core rules | `standards-gate.ts` denies an Edit or Write to a `.cs`, `.razor`, or `.razor.css` file until the same agent has read the matching references in full since its last compaction or `/clear` | `frie-core`, `frie-enterprise` |
+| `frie-dotnet` | `standards`: how C# and .NET express the core rules | `standards-gate.ts` denies an Edit or Write to a `.cs` or `.razor` file until the same agent has read the matching references in full since its last compaction or `/clear` | `frie-core` |
+| `frie-aspnet` | `standards`: hosting, layering, EF Core and Dapper data access, and Blazor for .NET services and apps | `standards-gate.ts` denies an Edit or Write to a `.cs`, `.razor`, or `.razor.css` file until the same agent has invoked `frie-enterprise:standards` and read the matching references. It allows every edit under a folder that holds a `project.godot` | `frie-dotnet`, `frie-enterprise` |
 | `frie-python` | `standards`: how Python expresses the core rules | `standards-gate.ts` does the same for a `.py` file | `frie-core` |
 | `frie-java` | `standards`: how Java expresses the core rules | `standards-gate.ts` does the same for a `.java` file or a Gradle build or settings file | `frie-core` |
 | `frie-neoforge` | `standards`: NeoForge Minecraft mod conventions | `standards-gate.ts` does the same for a Java, JSON, TOML, or Gradle file in a project whose `gradle.properties` sets `neo_version`, and requires the reference for that version | `frie-java` |
@@ -22,7 +23,7 @@ The code skills compose by layer, and each states a rule once. Installing a plug
 | Core | `frie-core` | What holds in every language and every kind of software |
 | Language | `frie-dotnet`, `frie-python`, `frie-java`, `frie-typescript` | Syntax, idiom, and tooling |
 | Domain | `frie-enterprise` | Architecture, state, performance, verification, and operations for one kind of software |
-| Framework | `frie-neoforge` | One framework's conventions, over a language and a domain |
+| Framework | `frie-aspnet`, `frie-neoforge` | One framework's conventions, over a language and a domain |
 
 A layer adds rules and never negates one from a layer under it. Where practice differs by domain, `frie-core` states the intent, marks the rule **(domain)**, and leaves the mechanism to the domain skill. Each domain skill answers every **(domain)** rule in its `Domain decisions` table. A rule that a layer would have to negate gets narrowed in the file that states it.
 
@@ -75,17 +76,18 @@ In a Claude Code session:
 
 ```
 /plugin marketplace add sidrus/frie-skills
-/plugin install frie-dotnet@frie
+/plugin install frie-aspnet@frie
 /plugin install secret-files-guard@frie
 ```
 
-Install the plugin for each language or framework the machine works in. Skills install namespaced, so the .NET skill is invoked as `frie-dotnet:standards`.
+Install the plugin for each language or framework the machine works in. A framework plugin brings its language and domain plugins with it, so `frie-aspnet` installs `frie-dotnet`, `frie-enterprise`, and `frie-core`. Skills install namespaced, so the .NET skill is invoked as `frie-dotnet:standards`.
 
 ## Test
 
 ```
 claude plugin test plugins/frie-core
 claude plugin test plugins/frie-dotnet
+claude plugin test plugins/frie-aspnet
 claude plugin test plugins/frie-python
 claude plugin test plugins/frie-java
 claude plugin test plugins/frie-neoforge
@@ -93,6 +95,7 @@ claude plugin test plugins/frie-typescript
 claude plugin test plugins/secret-files-guard
 npx -y -p typescript@5.9.3 tsc -p plugins/frie-core/tsconfig.json
 npx -y -p typescript@5.9.3 tsc -p plugins/frie-dotnet/tsconfig.json
+npx -y -p typescript@5.9.3 tsc -p plugins/frie-aspnet/tsconfig.json
 npx -y -p typescript@5.9.3 tsc -p plugins/frie-python/tsconfig.json
 npx -y -p typescript@5.9.3 tsc -p plugins/frie-java/tsconfig.json
 npx -y -p typescript@5.9.3 tsc -p plugins/frie-neoforge/tsconfig.json

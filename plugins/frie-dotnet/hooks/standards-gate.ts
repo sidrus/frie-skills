@@ -1,42 +1,34 @@
 import type { On, SessionMessage } from 'claude-code'
 
-type SuffixReferences = { readonly suffix: string; readonly references: readonly string[] }
-
 const STANDARDS = 'standards/references'
 const CSHARP = `${STANDARDS}/csharp.md`
 const CSHARP_TESTING = `${STANDARDS}/csharp-testing.md`
 const FORMATTING = `${STANDARDS}/formatting.md`
-const BLAZOR = `${STANDARDS}/blazor.md`
 const TESTING = 'engineering-patterns/references/testing.md'
 const EXEMPT_PATH = /^\/tmp\/|\/scratchpad\/|\/obj\/|\/bin\/|\/node_modules\//
 const TEST_PATH = /\/[Tt]ests?\/|\/[^/]*Tests?(\/|\.(cs|razor)$)/
-const REFERENCES_BY_SUFFIX: readonly SuffixReferences[] = [
-  { suffix: '.razor.cs', references: [BLAZOR, CSHARP, FORMATTING] },
-  { suffix: '.razor.css', references: [BLAZOR] },
-  { suffix: '.razor', references: [BLAZOR, CSHARP, FORMATTING] },
-  { suffix: '.cs', references: [CSHARP, FORMATTING] },
-]
+const CSHARP_FILE = /\.(cs|razor)$/
+const REFERENCES: readonly string[] = [CSHARP, FORMATTING]
+const TEST_REFERENCES: readonly string[] = [...REFERENCES, CSHARP_TESTING, TESTING]
 
 function normalizeSlashes(path: string): string {
   return path.replaceAll('\\', '/')
 }
 
 function listRequiredReferences(file: string): readonly string[] {
-  const references = EXEMPT_PATH.test(file) ? undefined : REFERENCES_BY_SUFFIX.find(({ suffix }) => file.endsWith(suffix))?.references
-  if (references === undefined) {
+  if (EXEMPT_PATH.test(file) || !CSHARP_FILE.test(file)) {
     return []
   }
-  return TEST_PATH.test(file) ? [...references, CSHARP_TESTING, TESTING] : references
+  return TEST_PATH.test(file) ? TEST_REFERENCES : REFERENCES
 }
 
 function locateReference(reference: string, root: string): string {
   return reference === TESTING ? `${TESTING} in the frie-core plugin` : `${root}/skills/${reference}`
 }
 
-function writeDenial(missing: readonly string[], file: string): string {
+function writeDenial(missing: readonly string[]): string {
   const paths = missing.join(', ')
-  const name = file.split('/').pop()
-  return `BLOCKED by the standards gate. Brandon requires the reference for what you touch to be read BEFORE the first edit, not as a check afterward. Not read in full yet in this context window: ${paths}. Read each one with the Read tool and no offset or limit, then repeat this edit. If ${name} crosses a repository, service, endpoint, or mapping boundary, read dotnet-layering.md as well. Reading them is the entire point, so do not route around this by writing the file through Bash.`
+  return `BLOCKED by the standards gate. Brandon requires the reference for what you touch to be read BEFORE the first edit, not as a check afterward. Not read in full yet in this context window: ${paths}. Read each one with the Read tool and no offset or limit, then repeat this edit. Reading them is the entire point, so do not route around this by writing the file through Bash.`
 }
 
 function listFullReads(transcript: SessionMessage[]): string[] {
@@ -64,6 +56,6 @@ export function registerStandardsGate(on: On) {
     if (missing.length === 0) {
       return next(e)
     }
-    return { deny: writeDenial(missing.map(reference => locateReference(reference, $.plugin.root)), file) }
+    return { deny: writeDenial(missing.map(reference => locateReference(reference, $.plugin.root))) }
   }).catch(($, e, next) => next(e))
 }

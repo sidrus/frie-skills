@@ -7,9 +7,8 @@ The rules here hold whatever the data-access library. The data-access layer itse
 
 ## Which subsystem owns a type
 
-Projects and folders follow the subsystem model in the `engineering-patterns` architecture reference, and `Program.cs` is the composition root.
+Projects and folders follow the subsystem model in the `engineering-patterns` architecture reference, and `Program.cs` is the composition root. The `frie-dotnet` C# reference says which visibility a contract takes.
 
-- A subsystem that is its own project makes its contract `public` and everything else `internal`. Inside one project, both are `internal`.
 - Each subsystem owns its data access: its `DbContext` or repositories, its data entities, and the migrations for its schema.
 - Plumbing with no domain knowledge that several subsystems need, such as a connection factory, is its own subsystem named for that one responsibility. It never holds data entities or another subsystem's types.
 - API request and response types belong to the subsystem whose endpoints serve them. They join its contract only when a .NET client in another project consumes them.
@@ -28,7 +27,7 @@ A type never serves two of these categories.
 
 ## Which types may appear where
 
-Who holds which *responsibility* is in the `engineering-patterns` architecture reference. This section covers only which types are allowed to appear in a signature.
+Who holds which *responsibility* is in the `engineering-patterns` architecture reference and the `frie-enterprise` layering reference. This section covers only which types are allowed to appear in a signature.
 
 | Layer | Accepts | Returns |
 |---|---|---|
@@ -87,17 +86,6 @@ internal static class OrderEndpoints
 
         return TypedResults.Ok(order.ToOrderDetailResponse());
     }
-}
-```
-
-When `Orders` is its own project, a contract operation is a `public` interface over `public` records, implemented by an `internal` service:
-
-```csharp
-/// <summary>Reads orders on behalf of other subsystems.</summary>
-public interface IOrderLookup
-{
-    /// <summary>Finds an order's summary, or returns null when no order has the ID.</summary>
-    Task<OrderSummary?> FindAsync(long id, CancellationToken cancellationToken);
 }
 ```
 

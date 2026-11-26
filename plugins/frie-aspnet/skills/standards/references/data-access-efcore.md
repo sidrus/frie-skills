@@ -12,7 +12,7 @@ EF already provides the repository and the unit of work. `DbSet<T>` is the repos
 
 ## Domain records are the mapped types
 
-The domain record is what `DbSet<T>` holds. `OnModelCreating` covers differences in column shape with value conversions, owned types, JSON columns, and a `ValueComparer` for converted collections. Expression-tree lambdas in that configuration follow the `== null` and `Array.Empty<T>()` exceptions in `csharp.md`.
+The domain record is what `DbSet<T>` holds. `OnModelCreating` covers differences in column shape with value conversions, owned types, JSON columns, and a `ValueComparer` for converted collections. Expression-tree lambdas in that configuration follow the `== null` and `Array.Empty<T>()` exceptions in the `frie-dotnet` C# reference.
 
 A separate `*Entity` with `*EntityMappingExtensions.cs` is justified only when model configuration cannot express the difference between the table and the record. Then it follows the entity rules in `data-access-dapper.md` for that one type.
 
