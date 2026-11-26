@@ -39,6 +39,7 @@ Rules marked **(tooling)** are enforceable by an analyzer, formatter, or type ch
 | designing anything: a new feature, a new type, a seam, a state change, a query, a service | `references/architecture.md` first. It defines subsystems and their contracts, and decides when a type gets an interface, where logic lives, and what YAGNI does and does not govern. |
 | any test file | `references/testing.md` |
 | a deployed service, an API, or an application over a database | invoke `frie-enterprise:standards`, which answers the **(domain)** rules for that work |
+| a game, a game mod, or a simulation an engine ticks | invoke `frie-gamedev:standards`, which answers the **(domain)** rules for that work |
 
 Read the reference **before** the first edit, not as a check afterward. Skip it only for a change that touches no code, such as a docs or config edit. The rules below apply either way.
 

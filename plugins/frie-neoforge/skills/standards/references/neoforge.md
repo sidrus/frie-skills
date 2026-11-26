@@ -4,9 +4,9 @@ Registries, events, networking, data generation, GameTests, and serialization AP
 
 ## Entry points and decisions
 
-Minecraft's callbacks are the entry-point layer: `Block`, `Item`, `BlockEntity`, and `Entity` overrides, event subscribers, commands, and payload handlers. Each one reads game state, calls a decision, and applies the result. The decision is a plain class or a static pure function that takes values, so it is testable without a running world.
+Minecraft's callbacks are the entry points the `frie-gamedev` engine reference describes: `Block`, `Item`, `BlockEntity`, and `Entity` overrides, event subscribers, commands, and payload handlers.
 
-- A decision takes the narrowest vanilla interface it needs, such as `BlockGetter`, `LevelReader`, `LevelWriter`, or `LevelAccessor`, rather than `Level` or `ServerLevel`. That interface is the seam a state-based fake implements.
+- The narrow interface a decision takes is a vanilla one, such as `BlockGetter`, `LevelReader`, `LevelWriter`, or `LevelAccessor`, rather than `Level` or `ServerLevel`.
 - An event subscriber's class and handler methods are `public`, because the event bus requires it.
 
 ## Layout
@@ -23,9 +23,9 @@ Packages are named for features (`portal`, `dimension`), never for kinds of game
 ## Sides and threads
 
 - Code that references `net.minecraft.client` classes lives only in a `client` package and is entered only through a `@Mod(dist = Dist.CLIENT)` class or a client-only subscriber. A reference from common code crashes a dedicated server.
-- Logic that changes the world runs on the logical server, behind `!level.isClientSide()`. The client only predicts and presents.
-- A payload from the client is untrusted input. The server's handler re-validates reach, permissions, and state before acting.
-- World state is touched only from the main thread. A lifecycle event or payload handler that runs on another thread hands its work to the main thread.
+- The authoritative side is the logical server, so logic that changes the world sits behind `!level.isClientSide()`.
+- The server's handler for a client payload re-validates reach, permissions, and state before acting.
+- A lifecycle event or payload handler that runs off the main thread hands its work to the main thread.
 
 ## Events
 
@@ -53,21 +53,21 @@ Prefer, in order, an event, a NeoForge extension hook or interface, an access tr
 ## State
 
 - State that belongs to a world lives in `SavedData` or a data attachment.
-- A static field that holds per-world state is cleared on `ServerStoppedEvent`, because single-player starts a new integrated server in the same JVM for each world opened.
+- A static field that holds per-world state is cleared on `ServerStoppedEvent`, which is where a session ends. Single-player starts a new integrated server in the same JVM for each world opened.
 - Configuration goes through a `ModConfigSpec`, read at the point of use so a reload takes effect.
 
 ## Logging
 
-The logger is SLF4J from `LogUtils.getLogger()`. Logging is the whole of a mod's observability.
+The logger is SLF4J from `LogUtils.getLogger()`.
 
 ## Performance
 
-A mod adds these to the shapes rejected without measurement: unbounded work in a per-tick path, a block or entity scan repeated every tick, and chunk loading from a tick path. Per-tick paths include `tick`, `animateTick`, `entityInside`, and any frequently fired event.
+The tick paths are `tick`, `animateTick`, `entityInside`, and any frequently fired event. A mod adds chunk loading from a tick path to the shapes rejected without measurement.
 
 ## Testing
 
 - **Unit tests** run on JUnit through ModDevGradle's `unitTest` support and `net.neoforged:testframework`. Registries and the mod load, but no level exists, so world reads and writes go through a map-backed fake of the narrow vanilla interfaces, kept in the test fixtures.
-- **GameTests** cover behavior that needs a real world: entities, block updates, structure placement, and events end to end. They live in a `gameTest` source set that the dev runs bind to the mod and the jar never contains, in the same packages as the code they test so they can reach package-private members.
+- **GameTests** are the engine-hosted tests, covering entities, block updates, structure placement, and events end to end. They live in a `gameTest` source set that the dev runs bind to the mod and the jar never contains, in the same packages as the code they test so they can reach package-private members.
 - A GameTest name becomes a resource path, so it is lowercase snake case that keeps all three parts, such as `admits_refuses_zombie_when_destination_is_mining_dimension`.
 - Inside a GameTest, the assertions are the GameTest helper's own.
 - The gate command is the data run followed by a check that `git status --porcelain` prints nothing, then `./gradlew build`, then the repo's GameTest server run, unless the repo's `CLAUDE.md` or `AGENTS.md` specifies others. The client and server dev runs are not part of it.
