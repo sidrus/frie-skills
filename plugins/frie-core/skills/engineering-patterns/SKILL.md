@@ -132,7 +132,7 @@ The wording of comments, docs, and messages follows the `writing-style-guide` sk
 - Surface simplifications unprompted during design work.
 - When a decision changes, re-derive everything downstream of it. Treat every remaining element as unjustified until the new decision justifies it again, rather than patching around a superseded decision.
 - Production code never reads the system time directly. Wall-clock time comes from an injected clock, so a test can fix it.
-- The code that acquires a resource releases it, with the language's scoped construct when the resource is finished in one scope. A type that holds a resource in a field implements the language's disposal protocol. A function that returns a resource hands ownership to its caller. Never release a resource you were handed.
+- The code that acquires a resource releases it, with the language's scoped construct when the resource is finished in one scope. A type that owns a resource it holds in a field implements the language's disposal protocol. A function that returns a resource hands ownership to its caller. Never release a resource you were handed.
 
 ## DRY
 
