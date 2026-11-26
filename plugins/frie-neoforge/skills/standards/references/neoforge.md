@@ -58,7 +58,7 @@ Prefer, in order, an event, a NeoForge extension hook or interface, an access tr
 
 ## Logging
 
-The logger is SLF4J from `LogUtils.getLogger()`. A mod is not a deployed service, so the observability floor in `engineering-patterns` does not apply, and logging is the whole of a mod's observability.
+The logger is SLF4J from `LogUtils.getLogger()`. Logging is the whole of a mod's observability.
 
 ## Performance
 

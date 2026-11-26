@@ -7,6 +7,8 @@ description: Language rules for C#, .NET, and Blazor, layered on engineering-pat
 
 **Invoke `frie-core:engineering-patterns` first.** It holds every rule that is the same in all languages: precedence, naming, signatures, absence, control flow, comments, design, testing, suppressions, and the done checklist. This skill adds only how each language expresses those rules in its own idioms, and never restates them.
 
+**Invoke `frie-enterprise:standards` as well.** The layering, data-access, and Blazor references here build on its layers, data, and observability rules.
+
 ## Read the reference for what you touch
 
 | Touching | Read |

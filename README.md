@@ -1,20 +1,32 @@
 # frie-skills
 
-Brandon Frie's Claude Code marketplace, `frie`. Each language or framework is its own plugin, so a machine installs only the standards it needs.
+Brandon Frie's Claude Code marketplace, `frie`. Each language, domain, or framework is its own plugin, so a machine installs only the standards it needs.
 
 ## Plugins
 
 | Plugin | Skills | Hook | Depends on |
 |---|---|---|---|
 | `frie-core` | `engineering-patterns`: language-neutral rules for design, architecture, testing, comments, and suppressions. `writing-style-guide`: prose style for docs, code comments, commit messages, and chat | `engineering-gate.ts` denies an Edit or Write to a source code file until the same agent has invoked `engineering-patterns` since its last compaction or `/clear`. `spelling.ts` adds a reminder to the context after an edit that adds a likely British spelling, and never blocks | |
-| `frie-dotnet` | `standards`: how C#, .NET, and Blazor express the core rules | `standards-gate.ts` denies an Edit or Write to a `.cs`, `.razor`, or `.razor.css` file until the same agent has read the matching references in full since its last compaction or `/clear` | `frie-core` |
+| `frie-enterprise` | `standards`: the domain practices for services and business applications, covering layering, data access, performance, observability, and integration testing | | `frie-core` |
+| `frie-dotnet` | `standards`: how C#, .NET, and Blazor express the core rules | `standards-gate.ts` denies an Edit or Write to a `.cs`, `.razor`, or `.razor.css` file until the same agent has read the matching references in full since its last compaction or `/clear` | `frie-core`, `frie-enterprise` |
 | `frie-python` | `standards`: how Python expresses the core rules | `standards-gate.ts` does the same for a `.py` file | `frie-core` |
 | `frie-java` | `standards`: how Java expresses the core rules | `standards-gate.ts` does the same for a `.java` file or a Gradle build or settings file | `frie-core` |
 | `frie-neoforge` | `standards`: NeoForge Minecraft mod conventions | `standards-gate.ts` does the same for a Java, JSON, TOML, or Gradle file in a project whose `gradle.properties` sets `neo_version`, and requires the reference for that version | `frie-java` |
 | `frie-typescript` | `standards`: how TypeScript and React express the core rules | `standards-gate.ts` does the same for a `.ts`, `.mts`, `.cts`, or `.tsx` file | `frie-core` |
 | `secret-files-guard` | | A tool-call hook that denies a tool call that reaches a secrets file. It denies the call when the hook fails. | |
 
-The code skills compose by layer, and each states a rule once. `frie-neoforge:standards` invokes `frie-java:standards`, which invokes `frie-core:engineering-patterns`. A new language or framework is a new plugin whose `standards` skill invokes the layer under it and lists that layer's plugin in `dependencies`. Installing a plugin installs its dependencies.
+The code skills compose by layer, and each states a rule once. Installing a plugin installs its dependencies.
+
+| Layer | Plugins | Rules on |
+|---|---|---|
+| Core | `frie-core` | What holds in every language and every kind of software |
+| Language | `frie-dotnet`, `frie-python`, `frie-java`, `frie-typescript` | Syntax, idiom, and tooling |
+| Domain | `frie-enterprise` | Architecture, state, performance, verification, and operations for one kind of software |
+| Framework | `frie-neoforge` | One framework's conventions, over a language and a domain |
+
+A layer adds rules and never negates one from a layer under it. Where practice differs by domain, `frie-core` states the intent, marks the rule **(domain)**, and leaves the mechanism to the domain skill. Each domain skill answers every **(domain)** rule in its `Domain decisions` table. A rule that a layer would have to negate gets narrowed in the file that states it.
+
+A new language, domain, or framework is a new plugin whose `standards` skill invokes the layer under it and lists that layer's plugin in `dependencies`. A domain plugin also has a `SOURCES.md` that no skill loads, which records the published source of each practice and lists the rules that are Brandon's own preference.
 
 The hooks are hooks modules, which require Claude Code 2.1.330 or later. Anthropic documents the module API as early access, so it can change between releases.
 
@@ -115,3 +127,5 @@ Put it in `plugins/<plugin>/skills/<name>/SKILL.md` and add `./skills/<name>` to
 ## Add a plugin
 
 Create `plugins/<plugin>/.claude-plugin/plugin.json`, add the plugin to `.claude-plugin/marketplace.json`, and add its validate step, and its test step when it has hooks, to `.github/workflows/tests.yml`.
+
+A new domain plugin answers every rule marked **(domain)** in `plugins/frie-core/skills/engineering-patterns`. Search that folder for `**(domain)**` to list them.

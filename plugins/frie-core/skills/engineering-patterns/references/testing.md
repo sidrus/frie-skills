@@ -4,7 +4,9 @@ Each language plugin's `standards` reference specifies that language's test runn
 
 ## TDD
 
-Default to TDD for anything with real behavior. Agree the seams first, then go red to green. Pure data or config files need no test.
+Default to TDD for any behavior a unit test can reach. Agree the seams first, then go red to green. Pure data or config files need no test.
+
+Some code a unit test cannot usefully reach. The domain skill says which code that is and what verifies it instead. **(domain)**
 
 The red run is watched. Execute the failing test and show its failure output before writing any implementation, on every cycle. Arranging test doubles for several slices up front, with no intervening red run, reads as skipping TDD.
 
@@ -27,9 +29,6 @@ Tests are classical, not mockist. The unit under test is a behavior, not a class
 
 - No tests for 1:1 mappers, pass-through wrappers, options records, or path literals.
 - No feature-flag toggle tests. Test the implementations behind the flag, and never write a flag-off test.
-- No persistence round-trip or schema-confirmation tests, meaning save-then-read-back asserting a column value. The database does its job. Schema and migration changes are verified transitively, because behavior tests running against the real built schema fail loudly when the DDL is wrong.
-- A stored procedure is never the unit under test. It is exercised through the code that calls it, so a test class named after a procedure is the anti-pattern. A procedure nothing calls is dead and gets deleted, unless it was built recently for documented backlog work whose caller is still coming.
-- Endpoint authorization is one parameterized test of role to status code, with no side-effect assertions.
 - Don't chase a coverage percentage. If the behaviors are correct, assume the implementation is. Name an accepted coverage gap rather than adding an implementation-detail test to close it.
 
 ## How to assert
@@ -58,7 +57,7 @@ The test-support module stays agnostic of any single consumer. When several proj
 
 ## Integration tests
 
-Integration tests use Testcontainers for managed dependencies such as a database or cache. Mock only unmanaged externals, meaning an identity provider or a third-party API. Integration tests live in a separate test project or source set, need Docker, and are not run casually.
+An integration test runs the code against the real thing a unit test fakes. Integration tests live in a separate test project or source set and are not run casually. What hosts them, and what they still fake, is the domain skill's decision. **(domain)**
 
 ## Naming
 

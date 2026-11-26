@@ -1,6 +1,6 @@
 {
   "name": "frie-dotnet",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Brandon Frie's C#, .NET, and Blazor standards, and a hook that denies a C# or Razor edit until its references are read.",
   "author": {
     "name": "Brandon Frie"
@@ -10,6 +10,6 @@
   "engines": {
     "claude-code": ">=2.1.330"
   },
-  "dependencies": ["frie-core"],
+  "dependencies": ["frie-core", "frie-enterprise"],
   "skills": ["./skills/standards"]
 }

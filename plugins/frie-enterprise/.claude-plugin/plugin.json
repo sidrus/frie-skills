@@ -1,0 +1,15 @@
+{
+  "name": "frie-enterprise",
+  "version": "1.0.0",
+  "description": "Brandon Frie's practices for services and business applications: layering, data access, performance, observability, and integration testing, layered on his engineering patterns.",
+  "author": {
+    "name": "Brandon Frie"
+  },
+  "repository": "https://github.com/sidrus/frie-skills",
+  "license": "MIT",
+  "engines": {
+    "claude-code": ">=2.1.330"
+  },
+  "dependencies": ["frie-core"],
+  "skills": ["./skills/standards"]
+}

@@ -16,6 +16,7 @@ jobs:
       - run: npm install -g @anthropic-ai/claude-code@2.1.330
       - run: claude plugin validate .
       - run: claude plugin validate plugins/frie-core
+      - run: claude plugin validate plugins/frie-enterprise
       - run: claude plugin validate plugins/frie-dotnet
       - run: claude plugin validate plugins/frie-python
       - run: claude plugin validate plugins/frie-java
