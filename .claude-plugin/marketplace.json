@@ -12,9 +12,21 @@
       "category": "engineering"
     },
     {
+      "name": "frie-enterprise",
+      "source": "./plugins/frie-enterprise",
+      "description": "Brandon Frie's practices for services and business applications: layering, data access, performance, observability, and integration testing, layered on his engineering patterns.",
+      "category": "engineering"
+    },
+    {
       "name": "frie-dotnet",
       "source": "./plugins/frie-dotnet",
-      "description": "Brandon Frie's C#, .NET, and Blazor standards, and a hook that denies a C# or Razor edit until its references are read.",
+      "description": "Brandon Frie's C# and .NET language standards, and a hook that denies a C# or Razor edit until its references are read.",
+      "category": "engineering"
+    },
+    {
+      "name": "frie-aspnet",
+      "source": "./plugins/frie-aspnet",
+      "description": "Brandon Frie's standards for .NET services and Blazor apps: hosting, layering, data access, and Blazor, layered on his C# and enterprise standards, and a hook that denies a C# or Razor edit outside a game project until its references are read.",
       "category": "engineering"
     },
     {

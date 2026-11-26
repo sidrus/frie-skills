@@ -18,7 +18,7 @@ Docstrings go on the contract. They follow Google style, and the docstring goes 
 
 ## Observability
 
-Logging goes through the standard library's `logging`. A deployed service runs under OpenTelemetry's zero-code instrumentation, installed with `opentelemetry-distro` and `opentelemetry-exporter-otlp` and started with `opentelemetry-instrument`. `engineering-patterns` decides what must be instrumented and what gets a metric.
+Logging goes through the standard library's `logging`. A deployed service runs under OpenTelemetry's zero-code instrumentation, installed with `opentelemetry-distro` and `opentelemetry-exporter-otlp` and started with `opentelemetry-instrument`. `frie-enterprise:standards` decides what must be instrumented and what gets a metric.
 
 ## Suppressions
 

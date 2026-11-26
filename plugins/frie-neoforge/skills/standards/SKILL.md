@@ -5,7 +5,7 @@ description: NeoForge Minecraft mod conventions, layered on the frie-java standa
 
 # NeoForge Standards
 
-**Invoke `frie-java:standards` first.** That chain also loads `engineering-patterns`. This skill adds what is specific to a mod and the shared rules a mod expresses differently, and never restates the layers under it.
+**Invoke `frie-java:standards` first.** That chain also loads `engineering-patterns`. This skill adds what is specific to a mod, and never restates the layers under it.
 
 ## Read the reference for what you touch
 

@@ -5,7 +5,16 @@ description: Language-neutral engineering rules for design, architecture, testin
 
 # Engineering Patterns
 
-These rules hold in every language. Each language plugin's `standards` skill, such as `frie-dotnet:standards`, adds that language's idioms, and framework skills such as `frie-neoforge:standards` add their own conventions on top. Neither repeats what is here.
+These rules hold in every language and every kind of software. Each language plugin's `standards` skill, such as `frie-dotnet:standards`, adds that language's idioms. A domain skill, such as `frie-enterprise:standards`, adds the practices of one kind of software. Framework skills such as `frie-neoforge:standards` add their own conventions on top. None repeats what is here.
+
+## Layers
+
+This skill is the bottom layer. A language skill and a domain skill sit beside each other above it, and a framework skill sits above both.
+
+- A layer adds rules and never negates a rule from a layer under it. A rule that a layer would have to negate is stated too broadly, so it gets narrowed in the file that states it.
+- A language skill rules on syntax, idiom, and tooling. A domain skill rules on architecture, state, performance, verification, and operations. Two skills in the same layer never rule on the same point, and when they do, one of the rules is in the wrong skill.
+- A rule marked **(domain)** states an intent that holds everywhere and leaves its mechanism to the domain skill. Every domain skill answers every **(domain)** rule once, in its `Domain decisions` table.
+- Code with no domain, such as a script or a command-line tool, follows the intent of a **(domain)** rule and the simplest mechanism that meets it.
 
 ## Intent over form
 
@@ -16,7 +25,7 @@ Each rule states an intent, and each language expresses it in its own idiom. Whe
 The user's own instructions, and any standards those instructions rank above these skills, win over everything below.
 
 1. The repo's own `CLAUDE.md` or `AGENTS.md` wins for repo-specific facts: schema names, package versions, folder layout, exemption lists, gate commands.
-2. The skills in the `frie-` plugins win for style, layering, and policy. A framework skill wins over a language reference, which wins over this skill, on the points where they deliberately differ.
+2. The skills in the `frie-` plugins win for style, layering, and policy. They never disagree with each other, per Layers above, so a disagreement between two of them is a defect to report.
 3. Other installed skills cover what neither of the above does. Where they conflict with the `frie-` skills, the `frie-` skills win.
 
 Existing code that disagrees with these skills is drift, not precedent. Write to the skills unless the repo's `CLAUDE.md` or `AGENTS.md` overrides them. Code a change writes or rewrites follows the skills. Drift elsewhere, including elsewhere in a file the change touches, is listed in the report and not fixed unless asked.
@@ -29,6 +38,7 @@ Rules marked **(tooling)** are enforceable by an analyzer, formatter, or type ch
 |---|---|
 | designing anything: a new feature, a new type, a seam, a state change, a query, a service | `references/architecture.md` first. It defines subsystems and their contracts, and decides when a type gets an interface, where logic lives, and what YAGNI does and does not govern. |
 | any test file | `references/testing.md` |
+| a deployed service, an API, or an application over a database | invoke `frie-enterprise:standards`, which answers the **(domain)** rules for that work |
 
 Read the reference **before** the first edit, not as a check afterward. Skip it only for a change that touches no code, such as a docs or config edit. The rules below apply either way.
 
@@ -36,7 +46,7 @@ Read the reference **before** the first edit, not as a check afterward. Skip it 
 
 Anything callable is named with a verb: methods, functions, private helpers, test helpers, test fixtures, and any named lambda. A noun name belongs to a value, meaning a property, field, or variable. `Code(string code)`, `RedisDatabase()`, and a fixture called `candidates` are all wrong. An accessor whose shape the language dictates, such as a Java record component, keeps that shape.
 
-Name an operation for what it means in the domain, such as `BlockHost` and `UnblockHost`, never for the storage mechanics behind it, such as save or deactivate. This holds from the stored procedure up through every layer over it.
+Name an operation for what it means in the domain, such as `BlockHost` and `UnblockHost`, never for the storage mechanics behind it, such as save or deactivate. This holds at every layer, down to the operation that writes the storage.
 
 ## Signatures
 
@@ -50,7 +60,7 @@ Name an operation for what it means in the domain, such as `BlockHost` and `Unbl
 
 - Handle absence explicitly, with a guard that fails loudly or with a fallback. Never use a non-null assertion.
 - No redundant null guards. If the target accepts null, assign directly.
-- Collections are never null. Empty is the absent case, initialized to the language's empty literal. Nullability on a collection belongs only on a persistence type, so the column stores NULL rather than an empty array, and the mapping converts empty to null on write and null to empty on read.
+- Collections are never null outside a persistence type. Empty is the absent case, initialized to the language's empty literal.
 - No inline constant arrays at repeated call sites. Hoist them to a named constant.
 
 ## Control flow
@@ -85,15 +95,14 @@ These apply to every decision regardless of layer. Structure, state, performance
 - When a decision changes, re-derive everything downstream of it. Treat every remaining element as unjustified until the new decision justifies it again, rather than patching around a superseded decision.
 - Classify errors at the call site, where the type and the stage are both known. Dispatch on exception type or structured fields, never on message text.
 - A catch sits at the narrowest scope that can act on the failure and catches only the narrowest exception type it handles. It handles the failure there or rethrows it wrapped, with the original as its cause. A catch-all appears only in an entry point's last-resort handler.
-- Time comes from an injected clock, so a test can fix it. Production code never reads the system time directly.
+- Production code never reads the system time directly. Wall-clock time comes from an injected clock, so a test can fix it.
 - Every resource is released by the language's scoped construct.
-- Push integrity and cleanup into the database (foreign key cascades, constraints) rather than app-ordered deletes or application-side locking. A constraint stays within one subsystem's storage.
 
 ## Testing, in brief
 
 Read `references/testing.md` before writing or changing a test.
 
-- TDD for anything with real behavior. Run the failing test and show its output before writing implementation, every cycle.
+- TDD for any behavior a unit test can reach. Run the failing test and show its output before writing implementation, every cycle.
 
 ## Suppressions
 

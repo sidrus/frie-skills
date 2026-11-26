@@ -11,7 +11,6 @@ const REFERENCES = '/elsewhere/frie-dotnet/skills/standards/references'
 const CSHARP = `${REFERENCES}/csharp.md`
 const CSHARP_TESTING = `${REFERENCES}/csharp-testing.md`
 const FORMATTING = `${REFERENCES}/formatting.md`
-const BLAZOR = `${REFERENCES}/blazor.md`
 const TESTING = '/elsewhere/frie-core/skills/engineering-patterns/references/testing.md'
 const WINDOWS_REFERENCES = 'C:\\Users\\u\\.claude\\plugins\\frie-dotnet\\skills\\standards\\references'
 const WINDOWS_CSHARP = `${WINDOWS_REFERENCES}\\csharp.md`
@@ -91,38 +90,26 @@ describe('standards gate', () => {
     expect(await decide($, buildEdit(TEST_SOURCE))).toBe('allow')
   })
 
-  test('denies a Razor write when blazor.md was not read', async ($, on) => {
-    arrange(on, buildReads([CSHARP, FORMATTING]))
+  test('denies a Razor write when formatting.md was not read', async ($, on) => {
+    arrange(on, buildReads([CSHARP]))
 
     expect(await decide($, { tool: 'Write', file_path: '/repo/src/Cart.razor', content: '' })).toBe('deny')
   })
 
-  test('allows a Razor write when its references were read', async ($, on) => {
-    arrange(on, buildReads([BLAZOR, CSHARP, FORMATTING]))
+  test('allows a Razor write when the C# references were read', async ($, on) => {
+    arrange(on, buildReads([CSHARP, FORMATTING]))
 
     expect(await decide($, { tool: 'Write', file_path: '/repo/src/Cart.razor', content: '' })).toBe('allow')
   })
 
-  test('denies a Razor code-behind edit when blazor.md was not read', async ($, on) => {
+  test('allows a Razor code-behind edit when the C# references were read', async ($, on) => {
     arrange(on, buildReads([CSHARP, FORMATTING]))
-
-    expect(await decide($, buildEdit('/repo/src/Cart.razor.cs'))).toBe('deny')
-  })
-
-  test('allows a Razor code-behind edit when its references were read', async ($, on) => {
-    arrange(on, buildReads([BLAZOR, CSHARP, FORMATTING]))
 
     expect(await decide($, buildEdit('/repo/src/Cart.razor.cs'))).toBe('allow')
   })
 
-  test('denies a Razor scoped CSS edit when blazor.md was not read', async ($, on) => {
+  test('allows a Razor scoped CSS edit when nothing was read', async ($, on) => {
     arrange(on, [])
-
-    expect(await decide($, buildEdit('/repo/src/Cart.razor.css'))).toBe('deny')
-  })
-
-  test('allows a Razor scoped CSS edit when blazor.md was read', async ($, on) => {
-    arrange(on, buildReads([BLAZOR]))
 
     expect(await decide($, buildEdit('/repo/src/Cart.razor.css'))).toBe('allow')
   })

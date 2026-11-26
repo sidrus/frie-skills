@@ -1,0 +1,15 @@
+{
+  "name": "frie-aspnet",
+  "version": "1.0.0",
+  "description": "Brandon Frie's standards for .NET services and Blazor apps: hosting, layering, data access, and Blazor, layered on his C# and enterprise standards, and a hook that denies a C# or Razor edit outside a game project until its references are read.",
+  "author": {
+    "name": "Brandon Frie"
+  },
+  "repository": "https://github.com/sidrus/frie-skills",
+  "license": "MIT",
+  "engines": {
+    "claude-code": ">=2.1.330"
+  },
+  "dependencies": ["frie-dotnet", "frie-enterprise"],
+  "skills": ["./skills/standards"]
+}
