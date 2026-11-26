@@ -4,7 +4,7 @@ Registries, events, networking, data generation, GameTests, and serialization AP
 
 ## Entry points and decisions
 
-Minecraft's callbacks are the entry points the `frie-gamedev` engine reference describes: `Block`, `Item`, `BlockEntity`, and `Entity` overrides, event subscribers, commands, and payload handlers.
+Minecraft's callbacks are the entry points `frie-gamedev:standards` describes: `Block`, `Item`, `BlockEntity`, and `Entity` overrides, event subscribers, commands, and payload handlers.
 
 - The narrow interface a decision takes is a vanilla one, such as `BlockGetter`, `LevelReader`, `LevelWriter`, or `LevelAccessor`, rather than `Level` or `ServerLevel`.
 - An event subscriber's class and handler methods are `public`, because the event bus requires it.

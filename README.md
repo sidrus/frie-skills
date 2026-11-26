@@ -10,7 +10,7 @@ Brandon Frie's Claude Code marketplace, `frie`. Each language, domain, or framew
 | `frie-enterprise` | `standards`: the domain practices for services and business applications, covering layering, data access, performance, observability, and integration testing | | `frie-core` |
 | `frie-gamedev` | `standards`: the domain practices for games and mods, covering simulation ticks, determinism, engine entry points, authority, and engine-hosted testing | `standards-gate.ts` denies an Edit or Write to a `.cs` or `.gd` file under a folder that holds a `project.godot` until the same agent has invoked the skill | `frie-core` |
 | `frie-dotnet` | `standards`: how C# and .NET express the core rules | `standards-gate.ts` denies an Edit or Write to a `.cs` or `.razor` file until the same agent has read the matching references in full since its last compaction or `/clear` | `frie-core` |
-| `frie-aspnet` | `standards`: hosting, layering, EF Core and Dapper data access, and Blazor for .NET services and apps | `standards-gate.ts` denies an Edit or Write to a `.cs`, `.razor`, or `.razor.css` file until the same agent has invoked `frie-enterprise:standards` and read the matching references. It allows every edit under a folder that holds a `project.godot` | `frie-dotnet`, `frie-enterprise` |
+| `frie-aspnet` | `standards`: hosting, layering, EF Core and Dapper data access, and Blazor for .NET services and apps | `standards-gate.ts` denies an Edit or Write to a `.cs`, `.razor`, or `.razor.css` file until the same agent has invoked `frie-enterprise:standards` and read the matching references. It allows every edit under a folder that holds a `project.godot`, and every edit to an Unreal `.Build.cs` or `.Target.cs` file | `frie-dotnet`, `frie-enterprise` |
 | `frie-python` | `standards`: how Python expresses the core rules | `standards-gate.ts` does the same for a `.py` file | `frie-core` |
 | `frie-java` | `standards`: how Java expresses the core rules | `standards-gate.ts` does the same for a `.java` file or a Gradle build or settings file | `frie-core` |
 | `frie-neoforge` | `standards`: NeoForge Minecraft mod conventions | `standards-gate.ts` does the same for a Java, JSON, TOML, or Gradle file in a project whose `gradle.properties` sets `neo_version`. It requires `frie-gamedev:standards` and the reference for that version | `frie-java`, `frie-gamedev` |
@@ -26,7 +26,9 @@ The code skills compose by layer, and each states a rule once. Installing a plug
 | Domain | `frie-enterprise`, `frie-gamedev` | Architecture, state, performance, verification, and operations for one kind of software |
 | Framework | `frie-aspnet`, `frie-neoforge` | One framework's conventions, over a language and a domain |
 
-A layer adds rules and never negates one from a layer under it. Where practice differs by domain, `frie-core` states the intent, marks the rule **(domain)**, and leaves the mechanism to the domain skill. Each domain skill answers every **(domain)** rule in its `Domain decisions` table. A rule that a layer would have to negate gets narrowed in the file that states it.
+A layer adds rules and never negates one from a layer under it. Where practice differs by domain, `frie-core` states the intent, ends the rule with a marker such as **(domain: state-change)**, and leaves the mechanism to the domain skill. Each domain skill answers every marker in its `Domain decisions` table, in a row that starts with the marker's key. A rule that a layer would have to negate gets narrowed in the file that states it.
+
+`node .github/scripts/check-domain-decisions.mjs` fails when a domain skill's table is missing a key, repeats one, or has a key that `frie-core` does not mark. CI runs it.
 
 A new language, domain, or framework is a new plugin whose `standards` skill invokes the layer under it and lists that layer's plugin in `dependencies`. A domain plugin also has a `SOURCES.md` that no skill loads, which records the published source of each practice and lists the rules that are Brandon's own preference.
 
@@ -134,4 +136,4 @@ Put it in `plugins/<plugin>/skills/<name>/SKILL.md` and add `./skills/<name>` to
 
 Create `plugins/<plugin>/.claude-plugin/plugin.json`, add the plugin to `.claude-plugin/marketplace.json`, and add its validate step, and its test step when it has hooks, to `.github/workflows/tests.yml`.
 
-A new domain plugin answers every rule marked **(domain)** in `plugins/frie-core/skills/engineering-patterns`. Search that folder for `**(domain)**` to list them.
+A new domain plugin answers every domain marker in `plugins/frie-core/skills/engineering-patterns`, in a `Domain decisions` table in its `standards` skill. Add the plugin's folder name to `DOMAIN_PLUGINS` in `.github/scripts/check-domain-decisions.mjs`, and the script lists the keys it is missing.

@@ -2,7 +2,7 @@
 
 This file describes general practice, not any one repo.
 
-`SKILL.md` holds the design rules that apply everywhere. This file holds the subsystem model and the structure, state, performance, and observability rules that follow from it. A domain skill decides the mechanism of each rule marked **(domain)**, as `SKILL.md` describes under Layers. Each language plugin's `standards` reference says how that language marks a contract and hides internals.
+`SKILL.md` holds the design rules that apply everywhere. This file holds the subsystem model and the structure, state, performance, and observability rules that follow from it. A domain skill decides the mechanism of each rule that ends with a domain marker, as `SKILL.md` describes under Layers. Each language plugin's `standards` reference says how that language marks a contract and hides internals.
 
 ## Subsystems
 
@@ -22,7 +22,7 @@ The rules:
 - Every type has exactly one owning subsystem. A type that another subsystem uses joins its owner's contract, and the consumer references it there. A persistence type never joins a contract. A project or folder that no subsystem owns, such as `Common`, `Shared`, or `Utils`, does not exist.
 - Dependencies between subsystems point at contracts and form no cycle. A cycle means one responsibility is split across two subsystems, so it moves into one of them or into a new subsystem of its own.
 - Subsystems nest, from a deployed service down to a folder, and these rules hold at every level. A folder is a nested subsystem only when it has its own responsibility and contract. Otherwise it is part of its parent's internals.
-- Only the composition root composes. A subsystem's registration wires its internals, with one entry point per startup phase the host framework has, and the root calls those entry points. Code that makes a decision receives what it depends on from its caller and never constructs or looks up a dependency itself. How the root hands a type its dependencies is the domain skill's decision. **(domain)**
+- Only the composition root composes. A subsystem's registration wires its internals, with one entry point per startup phase the host framework has, and the root calls those entry points. Code that makes a decision is handed what it depends on and never constructs or looks up a dependency itself. How a type is handed its dependencies is the domain skill's decision. **(domain: dependencies)**
 - A subsystem is tested in isolation. Its tests fake the contracts it depends on and use its real internals, per `testing.md`.
 
 ### Canonical shape
@@ -123,7 +123,7 @@ A new subsystem starts as a folder. It becomes its own project or deployed servi
 
 Records stay dumb. A record holds data and no transition rules, because which transitions are legal is business logic and business logic lives in a service.
 
-A service applies a state change, and whether it produces a modified copy of the record or changes the record in place is the domain skill's decision. **(domain)**
+A service applies a state change, and whether it produces a modified copy of the record or changes the record in place is the domain skill's decision. **(domain: state-change)**
 
 When more than one service needs the same transition rules, those rules become a state machine that holds real, testable logic. The state machine is static functions when it can be, and an interface only when it has dependencies worth faking.
 
@@ -131,10 +131,10 @@ When more than one service needs the same transition rules, those rules become a
 
 Reason before measuring. Static analysis of the growth curve comes first, then a measurement validates behavior within a shape already known to be correct. A measurement taken at development scale cannot see a cost that grows with the input, so it will report that the wrong shape is fine.
 
-A shape whose cost grows with its input when a constant-cost version exists is rejected without measurement. The domain skill lists those shapes, and a framework skill adds its own to that list. **(domain)**
+A shape whose cost grows with its input when a constant-cost version exists is rejected without measurement. The domain skill lists those shapes, and a framework skill adds its own to that list. **(domain: rejected-shapes)**
 
 Everything else is empirical. Take a measurement whenever one can be taken, and let the number decide.
 
 ## Observability
 
-A running system emits enough to diagnose a failure without attaching a debugger. What it must emit, and through what, is the domain skill's decision. **(domain)**
+A running system emits enough to diagnose a failure without attaching a debugger. What it must emit, and through what, is the domain skill's decision. **(domain: observability)**
