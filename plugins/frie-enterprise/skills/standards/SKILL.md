@@ -97,7 +97,8 @@ Host/
   Startup                       composition root: calls OrdersRegistration and InventoryRegistration
 tests/
   TestSupport/
-    FakeOrderLookup             state-based fake of the Orders contract
+    Orders/
+      FakeOrderLookup           state-based fake of the Orders contract
   Inventory/
     ReservationServiceTests     real Reservation internals with FakeOrderLookup
 ```

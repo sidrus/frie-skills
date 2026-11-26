@@ -30,7 +30,7 @@ A layer adds rules and never negates one from a layer under it. Where practice d
 
 `node .github/scripts/check-domain-decisions.mjs` fails when a domain skill's table is missing a key, repeats one, or has a key that `frie-core` does not mark. CI runs it.
 
-A new language, domain, or framework is a new plugin whose `standards` skill invokes the layer under it and lists that layer's plugin in `dependencies`. A domain plugin also has a `SOURCES.md` that no skill loads, which records the published source of each practice and lists the rules that are Brandon's own preference.
+A new language, domain, or framework is a new plugin whose `standards` skill invokes the layer under it and lists that layer's plugin in `dependencies`. `frie-core` and each domain plugin also have a `SOURCES.md` that no skill loads, which records the published source of each practice and lists the rules that are Brandon's own preference.
 
 The hooks are hooks modules, which require Claude Code 2.1.330 or later. Anthropic documents the module API as early access, so it can change between releases.
 

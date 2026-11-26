@@ -1,6 +1,6 @@
 {
   "name": "frie-core",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Brandon Frie's language-neutral engineering patterns and prose style, a hook that denies a code edit until engineering-patterns is loaded, and a hook that flags British spellings.",
   "author": {
     "name": "Brandon Frie"
