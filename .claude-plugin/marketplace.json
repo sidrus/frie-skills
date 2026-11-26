@@ -18,6 +18,12 @@
       "category": "engineering"
     },
     {
+      "name": "frie-gamedev",
+      "source": "./plugins/frie-gamedev",
+      "description": "Brandon Frie's practices for games and mods: simulation ticks, determinism, engine entry points, authority, and engine-hosted testing, layered on his engineering patterns, and a hook that denies a script edit in a Godot project until the skill is loaded.",
+      "category": "engineering"
+    },
+    {
       "name": "frie-dotnet",
       "source": "./plugins/frie-dotnet",
       "description": "Brandon Frie's C# and .NET language standards, and a hook that denies a C# or Razor edit until its references are read.",
@@ -44,7 +50,7 @@
     {
       "name": "frie-neoforge",
       "source": "./plugins/frie-neoforge",
-      "description": "Brandon Frie's NeoForge Minecraft mod conventions, layered on his Java standards, and a hook that denies a mod edit until the references for its NeoForge version are read.",
+      "description": "Brandon Frie's NeoForge Minecraft mod conventions, layered on his Java and game development standards, and a hook that denies a mod edit until the game skill is loaded and the references for its NeoForge version are read.",
       "category": "engineering"
     },
     {

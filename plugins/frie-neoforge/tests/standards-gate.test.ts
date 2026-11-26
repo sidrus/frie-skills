@@ -12,7 +12,9 @@ const REFERENCES = '/elsewhere/frie-neoforge/skills/standards/references'
 const NEOFORGE = `${REFERENCES}/neoforge.md`
 const NEOFORGE_21_1 = `${REFERENCES}/neoforge-21.1.md`
 const NEOFORGE_21_4 = `${REFERENCES}/neoforge-21.4.md`
+const GAMEDEV = '/elsewhere/frie-gamedev/1.0.0/skills/standards/SKILL.md'
 const WINDOWS_REFERENCES = 'C:\\Users\\u\\.claude\\plugins\\frie-neoforge\\skills\\standards\\references'
+const WINDOWS_GAMEDEV = 'C:\\Users\\u\\.claude\\plugins\\frie-gamedev\\skills\\standards\\SKILL.md'
 const MOD_PROPERTIES = '/mod/gradle.properties'
 const MOD_SOURCE = '/mod/src/main/java/com/example/portal/PortalBlock.java'
 const MOD_21_1: Files = { [MOD_PROPERTIES]: 'minecraft_version=1.21.1\nneo_version=21.1.172\n' }
@@ -68,8 +70,27 @@ describe('NeoForge standards gate', () => {
     expect(await decide($, buildEdit(MOD_SOURCE))).toBe('deny')
   })
 
-  test('allows a 21.1 mod Java edit when neoforge.md and the 21.1 reference were read', async ($, on) => {
+  test('allows a 21.1 mod Java edit when the game skill, neoforge.md, and the 21.1 reference were read', async ($, on) => {
+    arrange(on, MOD_21_1, buildReads([GAMEDEV, NEOFORGE, NEOFORGE_21_1]))
+
+    expect(await decide($, buildEdit(MOD_SOURCE))).toBe('allow')
+  })
+
+  test('denies a mod Java edit when the game skill was not loaded', async ($, on) => {
     arrange(on, MOD_21_1, buildReads([NEOFORGE, NEOFORGE_21_1]))
+
+    expect(await decide($, buildEdit(MOD_SOURCE))).toBe('deny')
+  })
+
+  test('allows a mod Java edit when the game skill was invoked', async ($, on) => {
+    on('tool.call', () => ({ result: RAN }))
+    arrangeFiles(on, MOD_21_1)
+    on('session.messages', () => ({
+      value: [
+        ...buildTranscript(buildReads([NEOFORGE, NEOFORGE_21_1])),
+        { role: 'assistant', text: '', toolUses: [{ tool_use_id: crypto.randomUUID(), tool: 'Skill', input: { skill: 'frie-gamedev:standards' }, text: RAN }] },
+      ],
+    }))
 
     expect(await decide($, buildEdit(MOD_SOURCE))).toBe('allow')
   })
@@ -87,19 +108,19 @@ describe('NeoForge standards gate', () => {
   })
 
   test('allows a 21.4 mod Java edit when neoforge.md and the 21.4 reference were read', async ($, on) => {
-    arrange(on, MOD_21_4, buildReads([NEOFORGE, NEOFORGE_21_4]))
+    arrange(on, MOD_21_4, buildReads([GAMEDEV, NEOFORGE, NEOFORGE_21_4]))
 
     expect(await decide($, buildEdit(MOD_SOURCE))).toBe('allow')
   })
 
   test('allows a 26.x mod Java edit when neoforge.md and the 21.4 reference were read', async ($, on) => {
-    arrange(on, { [MOD_PROPERTIES]: 'neo_version=26.1.0.12\n' }, buildReads([NEOFORGE, NEOFORGE_21_4]))
+    arrange(on, { [MOD_PROPERTIES]: 'neo_version=26.1.0.12\n' }, buildReads([GAMEDEV, NEOFORGE, NEOFORGE_21_4]))
 
     expect(await decide($, buildEdit(MOD_SOURCE))).toBe('allow')
   })
 
   test('allows a mod Java edit on a version with no reference when neoforge.md was read', async ($, on) => {
-    arrange(on, { [MOD_PROPERTIES]: 'neo_version=21.3.50\n' }, buildReads([NEOFORGE]))
+    arrange(on, { [MOD_PROPERTIES]: 'neo_version=21.3.50\n' }, buildReads([GAMEDEV, NEOFORGE]))
 
     expect(await decide($, buildEdit(MOD_SOURCE))).toBe('allow')
   })
@@ -165,7 +186,7 @@ describe('NeoForge standards gate', () => {
   })
 
   test('allows a mod Java edit on a Windows path when Windows-path references were read', async ($, on) => {
-    arrange(on, { 'C:/mod/gradle.properties': 'neo_version=21.1.172\n' }, buildReads([`${WINDOWS_REFERENCES}\\neoforge.md`, `${WINDOWS_REFERENCES}\\neoforge-21.1.md`]))
+    arrange(on, { 'C:/mod/gradle.properties': 'neo_version=21.1.172\n' }, buildReads([WINDOWS_GAMEDEV, `${WINDOWS_REFERENCES}\\neoforge.md`, `${WINDOWS_REFERENCES}\\neoforge-21.1.md`]))
 
     expect(await decide($, buildEdit('C:\\mod\\src\\main\\java\\Portal.java'))).toBe('allow')
   })
@@ -177,7 +198,7 @@ describe('NeoForge standards gate', () => {
   })
 
   test('allows a mod Java edit when the subagent read the references itself', async ($, on) => {
-    arrange(on, MOD_21_1, [NEOFORGE, NEOFORGE_21_1].map(path => ({ file_path: path, agentId: HELPER })))
+    arrange(on, MOD_21_1, [GAMEDEV, NEOFORGE, NEOFORGE_21_1].map(path => ({ file_path: path, agentId: HELPER })))
 
     expect(await decide($, { ...buildEdit(MOD_SOURCE), agentId: HELPER })).toBe('allow')
   })
