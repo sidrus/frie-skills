@@ -17,6 +17,7 @@ jobs:
       - run: claude plugin validate .
       - run: claude plugin validate plugins/frie-core
       - run: claude plugin validate plugins/frie-enterprise
+      - run: claude plugin validate plugins/frie-gamedev
       - run: claude plugin validate plugins/frie-dotnet
       - run: claude plugin validate plugins/frie-aspnet
       - run: claude plugin validate plugins/frie-python
@@ -25,6 +26,7 @@ jobs:
       - run: claude plugin validate plugins/frie-typescript
       - run: claude plugin validate plugins/secret-files-guard
       - run: claude plugin test plugins/frie-core
+      - run: claude plugin test plugins/frie-gamedev
       - run: claude plugin test plugins/frie-dotnet
       - run: claude plugin test plugins/frie-aspnet
       - run: claude plugin test plugins/frie-python

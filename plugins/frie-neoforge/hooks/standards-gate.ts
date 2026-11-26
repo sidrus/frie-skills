@@ -2,11 +2,14 @@ import type { Hook, On, SessionMessage } from 'claude-code'
 
 type Engine = Parameters<Hook<'tool.call'>>[0]
 type NeoVersion = { readonly major: number; readonly minor: number }
+type ToolUse = SessionMessage['toolUses'][number]
 
 const REFERENCES = 'standards/references'
 const NEOFORGE = `${REFERENCES}/neoforge.md`
 const NEOFORGE_21_1 = `${REFERENCES}/neoforge-21.1.md`
 const NEOFORGE_21_4 = `${REFERENCES}/neoforge-21.4.md`
+const DOMAIN_SKILL = 'frie-gamedev:standards'
+const DOMAIN_SKILL_FILE = /\/frie-gamedev\/(?:[^/]+\/)?skills\/standards\/SKILL\.md$/
 const EXEMPT_PATH = /^\/tmp\/|\/scratchpad\/|\/build\/|\/runs?\/|\/\.gradle\/|\/node_modules\//
 const MOD_FILE = /\.(java|json|toml|gradle|kts)$/
 const NEO_VERSION = /^\s*neo_version\s*=\s*(\d+)\.(\d+)/m
@@ -54,16 +57,25 @@ function listRequiredReferences({ major, minor }: NeoVersion): string[] {
 
 function writeDenial(missing: string[], { major, minor }: NeoVersion): string {
   const paths = missing.join(', ')
-  return `BLOCKED by the NeoForge standards gate. Brandon requires the reference for what you touch to be read BEFORE the first edit, not as a check afterward. This file is in a NeoForge ${major}.${minor} mod. Not read in full yet in this context window: ${paths}. Read each one with the Read tool and no offset or limit, then repeat this edit. Reading them is the entire point, so do not route around this by writing the file through Bash.`
+  return `BLOCKED by the NeoForge standards gate. Brandon requires the standards for what you touch to be loaded BEFORE the first edit, not as a check afterward. This file is in a NeoForge ${major}.${minor} mod. Not loaded in full yet in this context window: ${paths}. Invoke a skill with the Skill tool and read each reference with the Read tool and no offset or limit, then repeat this edit. Loading them is the entire point, so do not route around this by writing the file through Bash.`
 }
 
-function listFullReads(transcript: SessionMessage[]): string[] {
-  return transcript
-    .flatMap(message => message.toolUses)
-    .filter(use => use.tool === 'Read' && use.isError === undefined && use.input.offset === undefined && use.input.limit === undefined)
+function listFullReads(uses: readonly ToolUse[]): string[] {
+  return uses
+    .filter(use => use.tool === 'Read' && use.input.offset === undefined && use.input.limit === undefined)
     .map(use => use.input.file_path)
     .filter(path => typeof path === 'string')
     .map(normalizeSlashes)
+}
+
+function listMissing(version: NeoVersion, transcript: SessionMessage[], root: string): string[] {
+  const uses = transcript.flatMap(message => message.toolUses).filter(use => use.isError === undefined)
+  const reads = listFullReads(uses)
+  const hasDomain = uses.some(use => use.tool === 'Skill' && use.input.skill === DOMAIN_SKILL) || reads.some(path => DOMAIN_SKILL_FILE.test(path))
+  const missingReferences = listRequiredReferences(version)
+    .filter(reference => !reads.some(path => path.endsWith(`/${reference}`)))
+    .map(reference => `${root}/skills/${reference}`)
+  return hasDomain ? missingReferences : [`the ${DOMAIN_SKILL} skill`, ...missingReferences]
 }
 
 export function registerStandardsGate(on: On) {
@@ -80,11 +92,10 @@ export function registerStandardsGate(on: On) {
     if (!Array.isArray(transcript)) {
       return next(e)
     }
-    const reads = listFullReads(transcript)
-    const missing = listRequiredReferences(version).filter(reference => !reads.some(path => path.endsWith(`/${reference}`)))
+    const missing = listMissing(version, transcript, $.plugin.root)
     if (missing.length === 0) {
       return next(e)
     }
-    return { deny: writeDenial(missing.map(reference => `${$.plugin.root}/skills/${reference}`), version) }
+    return { deny: writeDenial(missing, version) }
   }).catch(($, e, next) => next(e))
 }

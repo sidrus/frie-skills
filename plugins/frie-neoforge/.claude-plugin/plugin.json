@@ -1,7 +1,7 @@
 {
   "name": "frie-neoforge",
-  "version": "1.1.1",
-  "description": "Brandon Frie's NeoForge Minecraft mod conventions, layered on his Java standards, and a hook that denies a mod edit until the references for its NeoForge version are read.",
+  "version": "2.0.0",
+  "description": "Brandon Frie's NeoForge Minecraft mod conventions, layered on his Java and game development standards, and a hook that denies a mod edit until the game skill is loaded and the references for its NeoForge version are read.",
   "author": {
     "name": "Brandon Frie"
   },
@@ -10,6 +10,6 @@
   "engines": {
     "claude-code": ">=2.1.330"
   },
-  "dependencies": ["frie-java"],
+  "dependencies": ["frie-java", "frie-gamedev"],
   "skills": ["./skills/standards"]
 }

@@ -71,6 +71,6 @@ Fixtures stay byte-faithful. Commit the real artifact as received and decode it 
 
 Every value a test builds comes from the language's Faker library. Generated data shows the behavior holds for any valid input, where a hand-picked literal shows it holds for one.
 
-- A literal appears only where the behavior under test depends on that exact value: a boundary, a format the code parses, or two values that must collide or differ. Everything else in the arrangement is generated, including names, identifiers, dates, and amounts.
+- A literal appears only where the behavior under test depends on that exact value: a boundary, a format the code parses, two values that must collide or differ, or a seed that makes a run repeatable. Everything else in the arrangement is generated, including names, identifiers, dates, and amounts.
 - Each domain type gets one generator, placed as Where test code lives says, so a new required property is set in one place. A test overrides only the properties that affect its behavior.
 - A value the test must reason about is drawn from Faker first, then reused in the arrangement and the assertion, never retyped.

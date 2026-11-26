@@ -1,11 +1,11 @@
 ---
 name: standards
-description: NeoForge Minecraft mod conventions, layered on the frie-java standards. Use when working in a NeoForge mod (a neoforge.mods.toml or the net.neoforged.moddev Gradle plugin), or for questions about mod registries, events, client and server sides, data generation, GameTests, or mixins.
+description: NeoForge Minecraft mod conventions, layered on the frie-java and frie-gamedev standards. Use when working in a NeoForge mod (a neoforge.mods.toml or the net.neoforged.moddev Gradle plugin), or for questions about mod registries, events, client and server sides, data generation, GameTests, or mixins.
 ---
 
 # NeoForge Standards
 
-**Invoke `frie-java:standards` first.** That chain also loads `engineering-patterns`. This skill adds what is specific to a mod, and never restates the layers under it.
+**Invoke `frie-java:standards` and `frie-gamedev:standards` first.** That chain also loads `engineering-patterns`. This skill is the framework layer over both. It adds what is specific to a NeoForge mod, and never restates the layers under it.
 
 ## Read the reference for what you touch
 
