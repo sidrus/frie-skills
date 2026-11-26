@@ -6,7 +6,7 @@ Each language plugin's `standards` reference specifies that language's test runn
 
 Default to TDD for any behavior a unit test can reach. Agree the seams first, then go red to green. Pure data or config files need no test.
 
-Some code a unit test cannot usefully reach. The domain skill says which code that is and what verifies it instead. **(domain)**
+Some code a unit test cannot usefully reach. The domain skill says which code that is and what verifies it instead. **(domain: beyond-unit-tests)**
 
 The red run is watched. Execute the failing test and show its failure output before writing any implementation, on every cycle. Arranging test doubles for several slices up front, with no intervening red run, reads as skipping TDD.
 
@@ -57,7 +57,7 @@ The test-support module stays agnostic of any single consumer. When several proj
 
 ## Integration tests
 
-An integration test runs the code against the real thing a unit test fakes. Integration tests live in a separate test project or source set and are not run casually. What hosts them, and what they still fake, is the domain skill's decision. **(domain)**
+An integration test runs the code against the real thing a unit test fakes. Integration tests live in a separate test project or source set and are not run casually. What hosts them, and what they still fake, is the domain skill's decision. **(domain: integration-host)**
 
 ## Naming
 

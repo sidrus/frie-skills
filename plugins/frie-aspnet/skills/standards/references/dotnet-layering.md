@@ -27,7 +27,7 @@ A type never serves two of these categories.
 
 ## Which types may appear where
 
-Who holds which *responsibility* is in the `engineering-patterns` architecture reference and the `frie-enterprise` layering reference. This section covers only which types are allowed to appear in a signature.
+Who holds which *responsibility* is in the `engineering-patterns` architecture reference and in `frie-enterprise:standards`. This section covers only which types are allowed to appear in a signature.
 
 | Layer | Accepts | Returns |
 |---|---|---|

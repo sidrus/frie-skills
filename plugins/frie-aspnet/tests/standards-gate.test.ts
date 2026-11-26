@@ -179,6 +179,18 @@ describe('ASP.NET standards gate', () => {
     expect(await decide($, buildEdit(SOURCE))).toBe('deny')
   })
 
+  test('allows an Unreal module rules edit when nothing was loaded', async ($, on) => {
+    arrange(on, [])
+
+    expect(await decide($, buildEdit('/game/Source/Shooter/Shooter.Build.cs'))).toBe('allow')
+  })
+
+  test('allows an Unreal target rules edit when nothing was loaded', async ($, on) => {
+    arrange(on, [])
+
+    expect(await decide($, buildEdit('/game/Source/ShooterEditor.Target.cs'))).toBe('allow')
+  })
+
   test('allows a plain CSS edit when nothing was loaded', async ($, on) => {
     arrange(on, [])
 

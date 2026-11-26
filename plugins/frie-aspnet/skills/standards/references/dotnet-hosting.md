@@ -16,7 +16,7 @@ A catch that expects its exception logs through the feature's `*Log.cs` extensio
 
 ## Observability
 
-Serilog is the logging framework. It is registered as the `ILogger` provider, so the `[LoggerMessage]` calls flow through it, and it exports to OpenTelemetry through `Serilog.Sinks.OpenTelemetry`. The `frie-enterprise` observability reference decides what must be instrumented and what gets a metric.
+Serilog is the logging framework. It is registered as the `ILogger` provider, so the `[LoggerMessage]` calls flow through it, and it exports to OpenTelemetry through `Serilog.Sinks.OpenTelemetry`. `frie-enterprise:standards` decides what must be instrumented and what gets a metric.
 
 ## HTTP
 

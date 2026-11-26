@@ -14,7 +14,7 @@ const ENTERPRISE_PLUGIN = 'frie-enterprise'
 const ENTERPRISE_SKILL = `${ENTERPRISE_PLUGIN}:standards`
 const ENTERPRISE_SKILL_FILE = /\/frie-enterprise\/(?:[^/]+\/)?skills\/standards\/SKILL\.md$/
 const GAME_PROJECT_FILE = 'project.godot'
-const EXEMPT_PATH = /^\/tmp\/|\/scratchpad\/|\/obj\/|\/bin\/|\/node_modules\//
+const EXEMPT_PATH = /^\/tmp\/|\/scratchpad\/|\/obj\/|\/bin\/|\/node_modules\/|\.(Build|Target)\.cs$/
 const TEST_PATH = /\/[Tt]ests?\/|\/[^/]*Tests?(\/|\.(cs|razor)$)/
 const REFERENCES_BY_SUFFIX: readonly SuffixReferences[] = [
   { suffix: '.razor.cs', references: [BLAZOR, HOSTING], needsDomain: true },

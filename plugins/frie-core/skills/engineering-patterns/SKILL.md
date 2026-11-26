@@ -13,8 +13,8 @@ This skill is the bottom layer. A language skill and a domain skill sit beside e
 
 - A layer adds rules and never negates a rule from a layer under it. A rule that a layer would have to negate is stated too broadly, so it gets narrowed in the file that states it.
 - A language skill rules on syntax, idiom, and tooling. A domain skill rules on architecture, state, performance, verification, and operations. Two skills in the same layer never rule on the same point, and when they do, one of the rules is in the wrong skill.
-- A rule marked **(domain)** states an intent that holds everywhere and leaves its mechanism to the domain skill. Every domain skill answers every **(domain)** rule once, in its `Domain decisions` table.
-- Code with no domain, such as a script or a command-line tool, follows the intent of a **(domain)** rule and the simplest mechanism that meets it.
+- A rule that ends with a marker such as **(domain: state-change)** states an intent that holds everywhere and leaves its mechanism to the domain skill. Every domain skill answers every marked rule once, in its `Domain decisions` table, in a row that starts with the marker's key.
+- Code with no domain, such as a script or a command-line tool, follows the intent of a marked rule and the simplest mechanism that meets it.
 
 ## Intent over form
 
@@ -38,8 +38,8 @@ Rules marked **(tooling)** are enforceable by an analyzer, formatter, or type ch
 |---|---|
 | designing anything: a new feature, a new type, a seam, a state change, a query, a service | `references/architecture.md` first. It defines subsystems and their contracts, and decides when a type gets an interface, where logic lives, and what YAGNI does and does not govern. |
 | any test file | `references/testing.md` |
-| a deployed service, an API, or an application over a database | invoke `frie-enterprise:standards`, which answers the **(domain)** rules for that work |
-| a game, a game mod, or a simulation an engine ticks | invoke `frie-gamedev:standards`, which answers the **(domain)** rules for that work |
+| a deployed service, an API, or an application over a database | invoke `frie-enterprise:standards`, the domain skill for that work |
+| a game, a game mod, or a simulation an engine ticks | invoke `frie-gamedev:standards`, the domain skill for that work |
 
 Read the reference **before** the first edit, not as a check afterward. Skip it only for a change that touches no code, such as a docs or config edit. The rules below apply either way.
 

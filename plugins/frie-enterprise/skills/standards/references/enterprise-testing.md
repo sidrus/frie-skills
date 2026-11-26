@@ -6,7 +6,7 @@ The `engineering-patterns` testing reference holds the rules for every test. Thi
 
 Integration tests use Testcontainers for managed dependencies such as a database or cache. Mock only unmanaged externals, meaning an identity provider or a third-party API. They need Docker.
 
-Data access has no unit tests, per `layering.md`, so integration tests over the real built schema are what verify it.
+Data access has no unit tests, so integration tests over the real built schema are what verify it.
 
 ## What not to test
 
